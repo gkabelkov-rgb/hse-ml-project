@@ -239,6 +239,7 @@ body {
 .gfield label { display: block; font-size: 11.5px; color: #8d93a1; }
 .gfield input, .gfield select { border: none; outline: none; background: transparent; font-size: 15.5px; font-weight: 600; font-family: inherit; width: 100%; margin-top: 2px; color: #1b1b21; appearance: none; }
 .gfield .rub { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #8d93a1; }
+.gfield input::placeholder, .ofield input::placeholder { color: #b6bac4; font-weight: 400; }
 .gfield.err { outline: 1.5px solid #e0334c; }
 .ofield { border: 1.5px solid #d9dce3; border-radius: 12px; padding: 8px 14px 9px; margin-top: 12px; position: relative; background: #fff; }
 .ofield label { position: absolute; top: -7px; left: 12px; background: #fff; padding: 0 4px; font-size: 11px; color: #8d93a1; }
@@ -403,8 +404,8 @@ const S0 = () => ({
   cartAgree: true,
   calc: { dp: 1000000, years: 8 },
   s1: { dp: 200000, months: 84, c1: true, c2: true, c3: true },
-  s2: { phone: '+7 (999) 999-99-99', email: 'example@gmail.com', same: false, addr2: 'г.Москва, ул.Пушкина, д.15  кв.9' },
-  s3: { emp: 'Полная занятость', sphere: 'Информационные технологии', org: 'ПАО СБЕРБАНК', wphone: '', waddr: '', wdate: '', pos: '', income: '', extra: false },
+  s2: { phone: '', email: '', same: false, addr2: 'г.Москва, ул.Пушкина, д.15  кв.9' },
+  s3: { emp: '', sphere: '', org: '', wphone: '', waddr: '', wdate: '', pos: '', income: '', extra: false },
   s4: { edu: '', fam: '', kids: '', cname: '', cphone: '', crel: '' },
   offers: { dp: 1200000, months: 84, ready: false },
   docs: { d1: null, d2: null, sent: false },
@@ -899,9 +900,9 @@ function siteStep2(){
       <div class="scard">
         <h2 style="font-size:16px">Заполните контактные данные</h2>
         <div class="gfield"><label>Номер телефона*</label>
-          <input id="f-phone" inputmode="tel" value="${esc(S.s2.phone)}" oninput="this.value=phoneMask(this.value)" onchange="S.s2.phone=this.value"></div>
+          <input id="f-phone" inputmode="tel" placeholder="+7 (999) 999-99-99" value="${esc(S.s2.phone)}" oninput="this.value=phoneMask(this.value)" onchange="S.s2.phone=this.value"></div>
         <div class="gfield"><label>Электронная почта*</label>
-          <input id="f-email" type="email" value="${esc(S.s2.email)}" onchange="S.s2.email=this.value"></div>
+          <input id="f-email" type="email" placeholder="example@gmail.com" value="${esc(S.s2.email)}" onchange="S.s2.email=this.value"></div>
       </div>
       <div class="scard">
         <h2 style="font-size:16px">Место жительства</h2>
@@ -1372,7 +1373,7 @@ function siteVtbo(){
     <div class="home-ind on-dark"><i></i></div>
   </div>`;
 }
-function kodSigned(){ S.contract.signed = true; S.wb = 'paid'; go('wb-orders'); }
+function kodSigned(){ S.contract.signed = true; S.wb = 'paid'; go('site-success'); }
 
 /* ============================= Успех ============================= */
 function qrSVG(){
@@ -1612,11 +1613,15 @@ const ROUTES = {
   'site-vtbo': siteVtbo,
   'site-success': siteSuccess,
 };
+let lastScreen = null;
 function render(){
   const scr = document.getElementById('scr');
+  const prev = scr.scrollTop;                 // запоминаем позицию
+  const same = lastScreen === S.screen;       // остались на том же экране?
   const fn = ROUTES[S.screen] || wbSearch;
   scr.innerHTML = fn() + (S.screen.startsWith('site') || S.screen.startsWith('wb') ? (S.screen==='wb-orders' ? '' : modalHtml()) : '');
-  scr.scrollTop = 0;
+  scr.scrollTop = same ? prev : 0;            // тот же экран — не прыгаем наверх
+  lastScreen = S.screen;
 }
 render();
 </script>
