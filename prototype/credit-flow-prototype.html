@@ -125,7 +125,8 @@ body {
 .tabbar .t { font-size: 21px; color: #55565c; position: relative; width: 44px; text-align: center; }
 .tabbar .t.active { color: #a232e8; }
 .tabbar .bank { background: #d8dae1; color: #fff; border-radius: 999px; font-size: 12.5px; font-weight: 600; padding: 6px 13px; }
-.tabbar .cartdot { position: absolute; top: -4px; right: 4px; background: #e0334c; color: #fff; font-size: 9.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.tabbar .cartdot { position: absolute; top: -4px; right: 4px; background: #e0334c; color: #fff; font-size: 9.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; animation: dotpop .3s ease; }
+@keyframes dotpop { 0% { transform: scale(0); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } }
 
 /* карточка товара */
 .hero { position: relative; }
@@ -398,6 +399,7 @@ const S0 = () => ({
   bank: null,          // 'otp' | 'vtb'
   vtbClient: null,     // true|false
   ordersOpen: true,    // плашка в «Заказах» развёрнута
+  cart: 0,             // товаров в корзине (для бейджа на иконке)
   cartAgree: true,
   calc: { dp: 1000000, years: 8 },
   s1: { dp: 200000, months: 84, c1: true, c2: true, c3: true },
@@ -441,7 +443,7 @@ const pill = () => `<div class="backpill" onclick="toWb()">‹ Wildberries</div>
 
 function toWb(){
   // возврат из сайта в приложение WB на актуальный экран статуса
-  go(S.wb ? 'wb-orders' : 'wb-cart');
+  go(S.wb ? 'wb-orders' : (S.cart>0 ? 'wb-cart' : 'wb-product'));
 }
 function resumeSite(){ go('site-' + S.site); }
 
@@ -468,9 +470,11 @@ const tabbar = (active='home') => `
   <div class="t ${active==='home'?'active':''}">⌂</div>
   <div class="t">☰</div>
   <div class="t"><span class="bank">банк</span></div>
-  <div class="t">🛒<span class="cartdot">1</span></div>
+  <div class="t ${active==='cart'?'active':''}" onclick="openCart()">🛒${S.cart>0?`<span class="cartdot">${S.cart}</span>`:''}</div>
   <div class="t">👤</div>
 </div>`;
+function addToCart(){ S.cart = 1; render(); }
+function openCart(){ if (S.cart>0) go('wb-cart'); }
 
 const demoChip = (label, fn) => `<div class="demo-row"><span class="demo" onclick="${fn}">⚙ демо: ${label}</span></div>`;
 
@@ -538,7 +542,9 @@ function wbProduct(){
   </div>
   <div class="wb-btns2">
     <button class="btn btn-orange" onclick="go('wb-credit-info')">В автокредит</button>
-    <button class="btn btn-wb" style="border-radius:999px" onclick="go('wb-cart')">В корзину</button>
+    ${S.cart>0
+      ? `<button class="btn btn-wb" style="border-radius:999px" onclick="openCart()">Перейти в корзину</button>`
+      : `<button class="btn btn-wb" style="border-radius:999px" onclick="addToCart()">В корзину</button>`}
   </div>
   ${tabbar('home')}
   <div class="home-ind"><i></i></div>`;
@@ -579,7 +585,7 @@ function wbCreditInfo(){
     <div style="height:8px"></div>
   </div>
   <div style="padding:10px 14px 0">
-    <button class="btn btn-dark" onclick="go('wb-cart')">Оформить кредит</button>
+    <button class="btn btn-dark" onclick="S.site='calc'; go('site-calc')">Оформить кредит</button>
     <div class="finefoot">Подбирает и оформляет кредит АО «Открытый финансовый маркетплейс», ИНН 9710090580</div>
   </div>
   <div class="home-ind"><i></i></div>`;
