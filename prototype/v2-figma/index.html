@@ -44,7 +44,7 @@ body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-s
 
 /* подпись на кадре */
 .signlayer { position:absolute; inset:0; z-index:30; }
-.signlayer canvas { position:absolute; left:6%; top:34%; width:88%; height:34%; touch-action:none; cursor:crosshair; }
+.signlayer canvas { position:absolute; left:5%; top:33.6%; width:90%; height:51%; touch-action:none; cursor:crosshair; }
 
 /* плейсхолдер, когда кадра ещё нет */
 .ph { position:absolute; inset:0; z-index:40; background:#f2f3f6; color:#33343c; display:flex; flex-direction:column;
@@ -194,7 +194,7 @@ function reset(){
 
 /* переходы со спец-целями */
 function resolve(target){
-  if (target === '@sign')   return S.bank === 'vtb' ? 'vtb-sign' : 'otp-sign';
+  if (target === '@sign')   return S.bank === 'vtb' ? 'vtb-client' : 'otp-sign';  // ВТБ: сначала «Стань клиентом», затем подписание
   if (target === '@pv')     return S.bank === 'vtb' ? 'vtb-pv'   : 'otp-pv';
   if (target === '@resume') return S.site || 'site-calc';
   return target;
@@ -329,6 +329,7 @@ function initSign(){
     px = x; py = y; drawn = true;
   };
   cv.onpointerup = () => down = false;
+  cv.onclick = e => e.stopPropagation();     // росчерк не должен «прокликивать» кнопки под ним
 }
 
 /* режим разметки: подсветка зон + снятие координат мышью */

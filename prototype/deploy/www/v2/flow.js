@@ -23,10 +23,10 @@ window.FLOW = {
     { id:'wb-product', file:'wb-02-kartochka.png', ctx:'wb',
       title:'WB · Карточка товара',
       hotspots:[
-        {x:4,y:73,w:60,h:4,go:'wb-credit-promo'},      // бейдж «по 50 000 ₽ в месяц»
-        {x:4,y:88,w:92,h:5,go:'wb-credit-promo'},      // строка «В автокредит»
-        {x:3,y:94,w:45,h:5,go:'wb-credit-promo'},      // кнопка слева
-        {x:52,y:94,w:45,h:5,go:'wb-cart'} ] },         // «В корзину»
+        {x:2,y:45.8,w:40,h:2,go:'wb-credit-promo'},    // бейдж «по 50 000 ₽ в месяц»
+        {x:2,y:71,w:96,h:4,go:'wb-credit-promo'},      // строка «В автокредит»
+        {x:1.5,y:78.2,w:42,h:3.6,go:'wb-credit-promo'},// оранжевая кнопка
+        {x:46,y:78.2,w:40,h:3.6,go:'wb-cart'} ] },     // «В корзину»
 
     { id:'wb-credit-promo', file:'wb-03-promo-kredit.png', ctx:'wb',
       title:'WB · Кредит от банков-партнёров',
@@ -39,7 +39,7 @@ window.FLOW = {
     /* ---------------- Сайт ОФМ: заявка ---------------- */
     { id:'site-calc', file:'site-01-kalkulyator.png', ctx:'site',
       title:'ОФМ · Подберите условия',
-      hotspots:[ {x:4,y:43,w:92,h:5,go:'site-gos'} ] },    // «Продолжить»
+      hotspots:[ {x:4,y:59,w:92,h:5.4,go:'site-gos'} ] },  // «Продолжить»
 
     { id:'site-gos', file:'site-02-gosuslugi.png', ctx:'site',
       title:'ОФМ · Авторизация в Госуслугах',
@@ -47,11 +47,11 @@ window.FLOW = {
 
     { id:'site-step1', file:'site-03-shag1-usloviya.png', ctx:'site',
       title:'ОФМ · Шаг 1: условия',
-      hotspots:[ {x:4,y:56,w:92,h:3,go:'site-step2'} ] },  // «Далее»
+      hotspots:[ {x:3,y:48.6,w:94,h:2.9,go:'site-step2'} ] },  // «Далее»
 
     { id:'site-step2', file:'site-04-shag2-kontakty.png', ctx:'site',
       title:'ОФМ · Шаг 2: контактные данные',
-      hotspots:[ {x:22,y:88,w:74,h:5,go:'site-step3'}, {x:4,y:88,w:12,h:5,go:'site-step1'} ] },
+      hotspots:[ {x:21,y:91,w:76,h:5.5,go:'site-step3'}, {x:2.5,y:91,w:13,h:5.5,go:'site-step1'} ] },
 
     { id:'site-step3', file:'site-05-shag3-rabota.png', ctx:'site',
       title:'ОФМ · Шаг 3: работа и доход',
@@ -75,8 +75,8 @@ window.FLOW = {
       title:'ОФМ · Шаг 5: одобрено (развилка банка)',
       wbStatus:'approved',
       hotspots:[
-        {x:6,y:52,w:88,h:5,go:'otp-docs',  set:{bank:'otp'}},   // «Продолжить» у ОТП
-        {x:6,y:75,w:88,h:5,go:'vtb-docs',  set:{bank:'vtb'}} ]},// «Продолжить» у ВТБ
+        {x:7,y:59.5,w:86,h:3.5,go:'otp-docs',  set:{bank:'otp'}},   // «Продолжить» у ОТП
+        {x:7,y:84.2,w:86,h:3.5,go:'vtb-docs',  set:{bank:'vtb'}} ]},// «Продолжить» у ВТБ
 
     /* ---------------- Ветка ОТП ---------------- */
     { id:'otp-docs', file:'otp-01-dop-dokumenty.png', ctx:'site',
@@ -112,7 +112,9 @@ window.FLOW = {
     { id:'vtb-sign-empty', file:'vtb-05-postavte-podpis.png', ctx:'site',
       title:'ВТБ · Поставьте подпись',
       draw:true,                                                  // рисуем подпись прямо на кадре
-      hotspots:[ {x:52,y:91,w:44,h:5,go:'vtb-pv', needDraw:true} ] },
+      hotspots:[
+        {x:51,y:92.5,w:45,h:5.3,go:'vtb-pv', needDraw:true},        // «Готово»
+        {x:4.5,y:92.5,w:44,h:5.3,go:'vtb-sign-empty'} ] },          // «Стереть» — перерисовать заново
 
     { id:'vtb-pv', file:'vtb-06-oplata-pv.png', ctx:'site',
       title:'ВТБ · Оплата первоначального взноса',
