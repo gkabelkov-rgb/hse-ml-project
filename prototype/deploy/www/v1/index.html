@@ -1,0 +1,1629 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WB × ОФМ — оформление автокредита (ОТП / ВТБ)</title>
+<style>
+/* ============ базовое ============ */
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+  background: #23252b; display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh; color: #1b1b21;
+}
+.topbar { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 18px; color: #b9bcc7; font-size: 13px; }
+.topbar b { color: #fff; font-weight: 600; }
+.topbar button { margin-left: auto; background: none; border: 1px solid #4a4d57; color: #b9bcc7; border-radius: 999px; padding: 5px 14px; font-size: 12px; cursor: pointer; }
+.topbar button:hover { color: #fff; border-color: #777; }
+
+/* ============ телефон ============ */
+.phone-wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 8px 0 20px; }
+.phone {
+  width: 393px; height: 852px; max-height: calc(100vh - 70px);
+  background: #fff; border-radius: 46px; border: 10px solid #17181c;
+  overflow: hidden; position: relative; box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  display: flex; flex-direction: column;
+}
+.screen { flex: 1; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; scrollbar-width: none; position: relative; }
+.screen::-webkit-scrollbar { display: none; }
+
+/* статус-бар iOS */
+.sb { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 14px 22px 6px; font-size: 15px; font-weight: 600; }
+.sb .icons { letter-spacing: 2px; font-size: 13px; }
+.sb.light { color: #fff; }
+/* пилюля возврата в WB (как в iOS при переходе в стороннее приложение) */
+.backpill {
+  position: absolute; top: 10px; left: 10px; z-index: 60;
+  background: #cb11ab; color: #fff; font-size: 12px; font-weight: 600;
+  padding: 6px 12px 6px 8px; border-radius: 999px; cursor: pointer;
+  display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 10px rgba(203,17,171,.45);
+  animation: pillin .25s ease;
+}
+@keyframes pillin { from { transform: translateY(-16px); opacity: 0; } }
+.backpill:hover { filter: brightness(1.08); }
+.home-ind { flex: 0 0 auto; padding: 6px 0 8px; display: flex; justify-content: center; }
+.home-ind i { display: block; width: 134px; height: 5px; border-radius: 3px; background: #111; }
+.home-ind.on-dark i { background: #fff; }
+
+/* ============ общие атомы ============ */
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; border: none; cursor: pointer;
+  font-family: inherit; font-size: 15px; font-weight: 600; border-radius: 14px; padding: 15px 18px; width: 100%; transition: filter .15s, opacity .15s; }
+.btn:active { filter: brightness(.93); }
+.btn-wb { background: #a232e8; color: #fff; }
+.btn-orange { background: #ff8c39; color: #fff; border-radius: 999px; }
+.btn-dark { background: #33343c; color: #fff; border-radius: 999px; }
+.btn-site { background: #9a27f5; color: #fff; border-radius: 999px; }
+.btn-site:disabled { background: #d9dce3; color: #9aa0ad; cursor: default; }
+.btn-lite { background: #f5f0fb; color: #9a27f5; }
+.btn-ghost { background: #fff; color: #9a27f5; border: 1.5px solid #d9b8fb; border-radius: 999px; }
+.btn-white { background: #fff; color: #1b1b21; border: 1px solid #e7e8ee; }
+.chipbtn { display: inline-flex; align-items: center; border: 1.5px solid #c98ef7; color: #9a27f5; background: #fff;
+  border-radius: 999px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.link { color: #a232e8; cursor: pointer; text-decoration: none; }
+.dim { color: #8d93a1; }
+.small { font-size: 12px; }
+
+/* демо-элементы (не из дизайна) */
+.demo { display: inline-flex; align-items: center; gap: 6px; margin: 10px auto 0; padding: 6px 12px; border: 1.5px dashed #9aa0ad;
+  color: #6d7380; background: rgba(255,255,255,.75); border-radius: 999px; font-size: 11.5px; cursor: pointer; }
+.demo:hover { border-color: #9a27f5; color: #9a27f5; }
+.demo-row { display: flex; flex-direction: column; align-items: center; padding: 4px 0 10px; }
+
+/* ============ WB app ============ */
+.wb-head { background: linear-gradient(180deg, #8e15c9, #a11ee2); color: #fff; padding-bottom: 12px; }
+.wb-head .sb { color: #fff; }
+.wb-nav { display: flex; align-items: center; padding: 8px 16px 4px; gap: 12px; }
+.wb-nav .ttl { flex: 1; text-align: center; font-size: 17px; font-weight: 600; }
+.wb-nav .ico { width: 24px; font-size: 20px; cursor: pointer; text-align: center; }
+.wb-search-field { margin: 8px 14px 0; background: #fff; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; gap: 8px; color: #1b1b21; }
+.wb-search-field input { border: none; outline: none; flex: 1; font-size: 15px; font-family: inherit; }
+.wb-search-field .x { color: #b6bac4; }
+
+.wb-nav2 { display: flex; align-items: center; padding: 12px 16px 6px; gap: 14px; }
+.wb-nav2 .sp { flex: 1; }
+.wb-nav2 .ico { font-size: 21px; cursor: pointer; color: #1b1b21; }
+
+.chips { display: flex; gap: 8px; padding: 12px 14px 2px; flex-wrap: wrap; }
+.chip { background: #f1f1f5; border-radius: 12px; padding: 10px 14px; font-size: 13.5px; white-space: nowrap; }
+
+.cards2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
+.pcard { position: relative; }
+.pcard .ph { position: relative; border-radius: 14px; overflow: hidden; }
+.pcard .fav { position: absolute; top: 8px; right: 8px; font-size: 18px; color: #33343c; }
+.badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; position: absolute; bottom: 8px; left: 8px; }
+.bdg-sale { background: #ffe3ee; color: #e5397c; font-size: 11px; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
+.bdg-credit { background: #f0e4ff; color: #a232e8; font-size: 10.5px; font-weight: 700; padding: 3px 6px; border-radius: 6px; letter-spacing: .3px; }
+.price { font-size: 18px; font-weight: 700; margin-top: 8px; }
+.stockline { color: #e0334c; font-size: 12px; font-weight: 600; margin-top: 3px; }
+.stockbar { height: 3px; border-radius: 2px; background: #eceef2; margin-top: 4px; position: relative; overflow: hidden; }
+.stockbar i { position: absolute; left: 0; top: 0; bottom: 0; width: 18%; background: #e0334c; border-radius: 2px; }
+.seller { display: flex; align-items: center; gap: 5px; font-size: 13px; margin-top: 6px; }
+.vcheck { width: 15px; height: 15px; border-radius: 50%; background: #2f9bff; color: #fff; font-size: 9px; display: inline-flex; align-items: center; justify-content: center; }
+.pname { font-size: 13.5px; color: #1b1b21; margin-top: 2px; }
+.rating { display: flex; align-items: center; gap: 4px; font-size: 12.5px; color: #8d93a1; margin-top: 4px; }
+.star { color: #ff9d0a; }
+
+/* иллюстрация авто (стилизация фото КМ/Ч UNI-K) */
+.carimg { background: #fff; border: 1px solid #eef0f4; display: flex; flex-direction: column; position: relative; }
+.carimg .brand { display: flex; align-items: center; gap: 5px; padding: 8px 10px 2px; font-size: 10px; font-weight: 800; letter-spacing: .8px; color: #1c3f94; }
+.carimg .brand .v { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #1c3f94; display: inline-flex; align-items: center; justify-content: center; font-size: 8px; }
+.carimg .banner { margin: 4px 8px 0; background: #f08c1b; border-radius: 6px; color: #fff; font-weight: 900; text-align: center; padding: 8px 0 30px; font-size: 26px; letter-spacing: 1px; position: relative; overflow: visible; }
+.carimg .banner .slash { position: absolute; right: 24%; top: -12px; width: 4px; height: 46px; background: #fff; transform: rotate(18deg); border-radius: 2px; }
+.carimg svg.car { display: block; width: 86%; margin: -26px auto 0; position: relative; z-index: 2; }
+.carimg .uni { text-align: center; font-weight: 900; font-style: italic; font-size: 22px; letter-spacing: 2px; color: #3f3a36; padding: 2px 0 4px; }
+.carimg .dealer { text-align: center; font-size: 9.5px; color: #55565c; padding-bottom: 8px; }
+.carimg.mini .banner { font-size: 15px; padding: 4px 0 18px; }
+.carimg.mini svg.car { margin-top: -14px; }
+.carimg.mini .uni { font-size: 12px; }
+.carimg.mini .dealer { display: none; }
+.carimg.mini .brand { font-size: 7px; padding: 5px 7px 0; }
+
+.wb-btns2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 14px; }
+.tabbar { flex: 0 0 auto; border-top: 1px solid #eef0f4; display: flex; align-items: center; justify-content: space-around; padding: 8px 6px 2px; background: #fff; }
+.tabbar .t { font-size: 21px; color: #55565c; position: relative; width: 44px; text-align: center; }
+.tabbar .t.active { color: #a232e8; }
+.tabbar .bank { background: #d8dae1; color: #fff; border-radius: 999px; font-size: 12.5px; font-weight: 600; padding: 6px 13px; }
+.tabbar .cartdot { position: absolute; top: -4px; right: 4px; background: #e0334c; color: #fff; font-size: 9.5px; font-weight: 700; min-width: 15px; height: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: center; animation: dotpop .3s ease; }
+@keyframes dotpop { 0% { transform: scale(0); } 60% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+/* карточка товара */
+.hero { position: relative; }
+.hero .ar { position: absolute; right: 14px; bottom: 40px; font-size: 18px; color: #33343c; }
+.dots { display: flex; gap: 4px; padding: 10px 14px; align-items: center; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: #d8dae1; }
+.dots i.on { background: #33343c; }
+.dots .sim { margin-left: auto; font-size: 14px; color: #33343c; }
+.sect { background: #fff; border-radius: 16px; margin: 8px 12px 0; padding: 14px; }
+.pgray { background: #f6f6f8; }
+.mrow { display: flex; align-items: center; gap: 10px; padding: 13px 14px; background: #fff; border-radius: 14px; margin: 8px 12px 0; font-size: 14.5px; cursor: pointer; }
+.mrow .chev { margin-left: auto; color: #b6bac4; }
+.tile2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 12px 0; }
+.tile2 .mrow { margin: 0; }
+.pay-badge { display: inline-flex; align-items: center; gap: 5px; background: #f0e4ff; color: #a232e8; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 6px 11px; margin-top: 8px; cursor: pointer; }
+.color-pick { display: flex; flex-direction: column; gap: 5px; width: 74px; }
+.color-pick .th { border: 2px solid #a232e8; border-radius: 12px; padding: 2px; }
+.wheel-ic { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg,#b06cf0,#7d3ff2); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 17px; position: relative; flex: 0 0 auto; }
+.wheel-ic .ok { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); background: #26ab5b; color: #fff; font-size: 6.5px; font-weight: 800; border-radius: 4px; padding: 1px 4px; letter-spacing: .2px; }
+
+/* magenta кредитный лендинг */
+.mag { background: linear-gradient(180deg, #ff0a92 0%, #f2007e 60%, #e60077 100%); min-height: 300px; color: #fff; }
+.wb-credit-card { background: #fff; color: #1b1b21; border-radius: 20px 20px 0 0; margin-top: 36px; }
+.step6 { display: flex; gap: 12px; padding: 9px 0; }
+.step6 .n { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: #17795c; color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+.benef { display: flex; gap: 12px; padding: 9px 0; }
+.benef .ic { font-size: 19px; width: 26px; text-align: center; }
+.finefoot { text-align: center; font-size: 11px; color: #8d93a1; padding: 8px 22px 4px; }
+
+/* корзина */
+.cart-addr { display: flex; gap: 10px; align-items: flex-start; }
+.payways { display: flex; gap: 8px; overflow: hidden; margin-top: 10px; }
+.payway { flex: 0 0 118px; border-radius: 14px; padding: 10px; font-size: 12px; border: 1.5px solid transparent; }
+.payway b { display: block; font-size: 12.5px; }
+.payway .ic { font-size: 16px; display: block; margin-bottom: 14px; }
+.pw-wallet { background: #ffe9d6; }
+.pw-partner { background: #f6f0ff; border-color: #a232e8; }
+.pw-card { background: #f1f1f5; }
+.totals div { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13.5px; }
+.totals .t { font-size: 15px; font-weight: 700; padding-bottom: 6px; }
+.agree { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; margin-top: 12px; }
+.cbx { flex: 0 0 auto; width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid #c9cdd6; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; cursor: pointer; margin-top: 1px; }
+.cbx.on { background: #a232e8; border-color: #a232e8; }
+
+/* заказы */
+.alert-orange { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; margin: 8px 12px 0; padding: 11px 12px; }
+.alert-orange .i { flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: #ff7b1c; color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.alert-orange .go { margin-left: auto; flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: #ffe9d6; color: #ff7b1c; display: flex; align-items: center; justify-content: center; }
+.ord-plash { background: #fff; border-radius: 16px; margin: 8px 12px 0; padding: 14px; }
+.ord-plash .carrow { display: flex; align-items: center; gap: 8px; color: #8d93a1; font-size: 13px; cursor: pointer; }
+.ord-plash .carrow .sq { width: 18px; height: 18px; border-radius: 5px; background: #eceef2; }
+.ord-plash .carrow .chev { margin-left: auto; color: #8d93a1; transition: transform .2s; }
+.ord-plash h3 { font-size: 19px; margin-top: 8px; }
+.ord-plash .desc { font-size: 13.5px; color: #43454d; margin-top: 6px; line-height: 1.45; }
+.ord-photo { width: 96px; margin-top: 12px; cursor: pointer; }
+.ord-price { font-size: 14px; font-weight: 600; margin-top: 6px; }
+.transit { padding: 4px 12px 0; }
+.transit h3 { font-size: 19px; padding: 14px 2px 8px; }
+.tr-card { background: #fff; border-radius: 16px; padding: 12px; display: flex; gap: 8px; }
+.tr-date { flex: 0 0 34px; text-align: center; }
+.tr-date b { font-size: 17px; display: block; }
+.tr-date span { font-size: 10.5px; color: #8d93a1; text-transform: lowercase; }
+.tr-items { display: flex; gap: 8px; flex: 1; overflow: hidden; }
+.tr-it { flex: 0 0 88px; }
+.tr-it .im { height: 96px; border-radius: 10px; position: relative; overflow: hidden; }
+.tr-it .sz { position: absolute; top: 5px; left: 5px; background: #fff; font-size: 9px; font-weight: 700; border-radius: 4px; padding: 1px 4px; }
+.tr-it .np { position: absolute; bottom: 5px; left: 5px; background: #ffd8de; color: #e0334c; font-size: 8.5px; font-weight: 800; border-radius: 4px; padding: 2px 4px; }
+.tr-it .pr { font-size: 13px; font-weight: 700; margin-top: 5px; }
+.tr-it .st { font-size: 11.5px; margin-top: 1px; }
+.st-p { color: #a232e8; } .st-o { color: #ff7b1c; }
+.pay-btn { background: #fff; color: #a232e8; border-radius: 14px; margin: 10px 12px 0; padding: 14px; text-align: center; font-weight: 600; font-size: 14.5px; cursor: pointer; }
+.adbanner { margin: 10px 12px 12px; border-radius: 14px; overflow: hidden; background: #ffe712; display: flex; align-items: stretch; height: 84px; position: relative; }
+.adbanner .ph { flex: 1; background: linear-gradient(120deg,#7fb069,#4c7a43); }
+.adbanner .tx { flex: 1.3; padding: 8px 10px; font-weight: 900; font-size: 13px; line-height: 1.15; color: #111; }
+.adbanner .k { font-size: 10px; background: #111; color: #ffe712; display: inline-block; padding: 1px 5px; border-radius: 3px; margin-bottom: 3px; }
+.adbanner .off { position: absolute; right: 8px; bottom: 8px; background: #2fae4e; color: #fff; font-size: 11px; font-weight: 800; border-radius: 6px; padding: 3px 6px; }
+.adbanner .adlbl { position: absolute; right: 8px; top: 6px; font-size: 9px; color: #6a6a2e; }
+
+/* детали заказа */
+.det-thumb { width: 56px; border: 2px solid #a232e8; border-radius: 12px; padding: 2px; margin: 10px 12px 0; }
+.det-prod { display: flex; gap: 10px; align-items: center; background: #fff; border-radius: 16px; margin: 10px 12px 0; padding: 12px; }
+.det-prod .sq { flex: 0 0 54px; height: 54px; border-radius: 10px; background: #f1f1f5; }
+.bdg-kredit { background: #dff1fd; color: #2f9bff; font-size: 10.5px; font-weight: 800; border-radius: 5px; padding: 2px 6px; vertical-align: 2px; }
+.trackline { background: #f6f6f8; border-radius: 14px; padding: 14px; margin-top: 10px; }
+.trackline .ics { display: flex; align-items: center; justify-content: center; gap: 0; }
+.trackline .ic { width: 34px; height: 34px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #a232e8; }
+.trackline .ln { width: 46px; height: 2px; background: #e3e5ea; }
+.trackline .cap { display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 12px; color: #43454d; }
+.det-row { display: flex; align-items: center; padding: 13px 2px; font-size: 14.5px; border-bottom: 1px solid #f1f1f5; cursor: pointer; }
+.det-row .chev { margin-left: auto; color: #b6bac4; }
+.two-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.pickcards { display: flex; gap: 8px; padding: 0 12px 12px; }
+.pickcards .pc { flex: 1; height: 92px; border-radius: 12px; background: linear-gradient(120deg,#d9c6b4,#b39f8c); position: relative; }
+.pickcards .pc .h { position: absolute; top: 6px; right: 8px; color: #fff; }
+
+/* ============ сайт ОФМ ============ */
+.site { background: #f2f3f6; flex: 1; display: flex; flex-direction: column; }
+.site-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; background: #f8f8fa; }
+.wb-logo { background: linear-gradient(90deg,#c711d6,#a232e8); color: #fff; font-weight: 700; font-size: 13.5px; border-radius: 999px; padding: 6px 14px; font-style: italic; letter-spacing: .2px; }
+.ofm-logo { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 15px; color: #23252b; }
+.ofm-logo .o { width: 20px; height: 20px; border-radius: 50%; border: 3px solid #14b86e; border-right-color: #f2007e; transform: rotate(35deg); }
+.site-body { padding: 0 16px 24px; }
+.site h1 { font-size: 23px; line-height: 1.2; padding-top: 12px; }
+.site .sub { color: #55565c; font-size: 14px; margin-top: 6px; }
+.stepmeta { color: #8d93a1; font-size: 13px; padding-top: 14px; }
+.scard { background: #fff; border-radius: 18px; padding: 16px; margin-top: 14px; }
+.scard h2 { font-size: 17px; }
+.scard .hint { font-size: 12.5px; color: #8d93a1; margin-top: 2px; }
+.gfield { background: #f2f3f6; border-radius: 12px; padding: 9px 14px 10px; margin-top: 12px; position: relative; }
+.gfield label { display: block; font-size: 11.5px; color: #8d93a1; }
+.gfield input, .gfield select { border: none; outline: none; background: transparent; font-size: 15.5px; font-weight: 600; font-family: inherit; width: 100%; margin-top: 2px; color: #1b1b21; appearance: none; }
+.gfield .rub { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #8d93a1; }
+.gfield input::placeholder, .ofield input::placeholder { color: #b6bac4; font-weight: 400; }
+.gfield.err { outline: 1.5px solid #e0334c; }
+.ofield { border: 1.5px solid #d9dce3; border-radius: 12px; padding: 8px 14px 9px; margin-top: 12px; position: relative; background: #fff; }
+.ofield label { position: absolute; top: -7px; left: 12px; background: #fff; padding: 0 4px; font-size: 11px; color: #8d93a1; }
+.ofield input, .ofield select { border: none; outline: none; font-size: 15px; font-family: inherit; width: 100%; background: transparent; appearance: none; color: #1b1b21; }
+.ofield .chev, .gfield .chev { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #8d93a1; pointer-events: none; }
+.ofield.err { border-color: #e0334c; }
+.fhint { font-size: 12px; color: #8d93a1; margin-top: 6px; padding-left: 2px; }
+.termchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.termchips .tc { border-radius: 999px; background: #f2f3f6; padding: 10px 16px; font-size: 13.5px; cursor: pointer; border: 1.5px solid transparent; }
+.termchips .tc.on { background: #fff; border-color: #b769f2; color: #9a27f5; font-weight: 600; }
+.payblock { background: #f2f3f6; border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+.payblock .lbl { font-size: 12px; color: #8d93a1; }
+.payblock .val { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.legal { font-size: 12px; color: #8d93a1; margin-top: 12px; line-height: 1.45; }
+.site-foot { background: #fff; margin-top: 22px; padding: 18px 16px 26px; font-size: 12px; color: #8d93a1; line-height: 1.5; }
+.gos-ic { width: 26px; height: 26px; background: #fff; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+.gos-ic svg { width: 16px; height: 16px; }
+
+.progress { display: flex; align-items: center; margin-top: 12px; }
+.progress .pd { width: 9px; height: 9px; border-radius: 50%; border: 2px solid #a95df1; background: #fff; flex: 0 0 auto; }
+.progress .pd.done { background: #a95df1; }
+.progress .pl { flex: 1; height: 2.5px; background: #e3d3f7; }
+.progress .pl.done { background: #a95df1; }
+.shield { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: #55565c; margin-top: 12px; }
+.shield .ic { color: #14b86e; font-size: 14px; }
+
+.slider { width: 100%; margin-top: 10px; accent-color: #9a27f5; height: 20px; }
+.recoblock { background: #f6efff; border-radius: 14px; padding: 12px 14px; display: flex; gap: 10px; font-size: 12.5px; color: #43454d; margin-top: 14px; line-height: 1.45; }
+.recoblock .i { color: #9a27f5; font-weight: 700; }
+.tglrow { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 13px; line-height: 1.4; }
+.tgl { flex: 0 0 44px; width: 44px; height: 26px; border-radius: 14px; background: #d9dce3; position: relative; cursor: pointer; transition: background .15s; margin-top: 1px; }
+.tgl i { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.tgl.on { background: #9a27f5; }
+.tgl.on i { left: 21px; }
+.acc { background: #fff; border-radius: 18px; padding: 16px; margin-top: 14px; }
+.acc .acc-h { display: flex; align-items: center; cursor: pointer; font-size: 16px; font-weight: 700; }
+.acc .acc-h .chev { margin-left: auto; color: #8d93a1; transition: transform .2s; }
+.acc.open .acc-h .chev { transform: rotate(180deg); }
+.acc .acc-b { display: none; }
+.acc.open .acc-b { display: block; }
+.pgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 10px; margin-top: 12px; }
+.pitem label { display: block; font-size: 11.5px; color: #8d93a1; }
+.pitem div { font-size: 14.5px; font-weight: 600; margin-top: 2px; }
+.pitem.wide { grid-column: 1 / -1; }
+.gosnote { display: flex; gap: 8px; font-size: 12px; color: #55565c; border-top: 1px solid #f1f1f5; margin-top: 14px; padding-top: 12px; }
+.navrow { display: flex; gap: 10px; margin-top: 16px; align-items: center; }
+.backround { flex: 0 0 46px; width: 46px; height: 46px; border-radius: 50%; background: #fff; border: 1px solid #e3e5ea; color: #55565c; font-size: 17px; cursor: pointer; }
+.banklogo { flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.bl-otp { background: #111; color: #fff; }
+.bl-otp .c { width: 22px; height: 22px; border: 3px solid #fff; border-radius: 50%; border-left-color: #35b34a; transform: rotate(-40deg); }
+.bl-vtb { background: #0a2896; color: #fff; font-weight: 800; font-size: 8px; letter-spacing: .4px; }
+.offer-h { display: flex; align-items: center; gap: 10px; }
+.offer-h .nm b { display: block; font-size: 15.5px; }
+.offer-h .nm span { font-size: 12.5px; color: #8d93a1; }
+.offer-h .inf { margin-left: auto; color: #b6bac4; font-size: 16px; }
+.ogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ogrid .oi label { font-size: 11.5px; color: #8d93a1; display: block; }
+.ogrid .oi div { font-weight: 700; font-size: 14.5px; margin-top: 1px; }
+.waitrow { display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 16px; padding: 13px 14px; margin-top: 10px; font-weight: 700; font-size: 15px; }
+.infoviol { display: flex; gap: 10px; background: #f0e4fd; border-radius: 14px; padding: 13px 14px; font-size: 13px; color: #43454d; margin-top: 12px; }
+.infoviol .i { color: #9a27f5; font-weight: 800; }
+.secttl { font-size: 17px; font-weight: 700; margin-top: 18px; }
+
+/* оформление сделки */
+.docdrop { border: 1.5px dashed #c9cdd6; border-radius: 12px; padding: 22px 14px; text-align: center; color: #9aa0ad; font-size: 13.5px; margin-top: 12px; cursor: pointer; }
+.docdrop:hover { border-color: #9a27f5; color: #9a27f5; }
+.filerow { display: flex; align-items: center; gap: 10px; border: 1px solid #e7e8ee; border-radius: 12px; padding: 11px 12px; margin-top: 10px; }
+.filerow .fi { color: #9a27f5; font-size: 17px; }
+.filerow b { font-size: 13.5px; display: block; }
+.filerow span { font-size: 11.5px; color: #8d93a1; }
+.filerow .del { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; background: #e0334c; color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.subh { font-size: 14.5px; font-weight: 700; margin-top: 16px; }
+.stepper { margin-top: 4px; }
+.stp { display: flex; gap: 12px; padding: 10px 0 2px; position: relative; }
+.stp .rail { position: absolute; left: 12px; top: 38px; bottom: -6px; width: 1.5px; background: #e7e8ee; }
+.stp:last-child .rail { display: none; }
+.stp .n { flex: 0 0 25px; width: 25px; height: 25px; border-radius: 50%; background: #f0e4fd; color: #9a27f5; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; z-index: 1; }
+.stp .n.done { background: #22b86b; color: #fff; }
+.stp .bd { flex: 1; padding-bottom: 8px; }
+.stp .bd b { font-size: 14px; }
+.stp .bd p { font-size: 12.5px; color: #8d93a1; margin-top: 4px; line-height: 1.45; }
+.stp .bd .act { margin-top: 8px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.stp .bd .act .btn { width: auto; padding: 10px 18px; font-size: 13.5px; border-radius: 999px; }
+.btn-dis { background: #e3d7f4 !important; color: #fff !important; cursor: default !important; }
+.docrow { display: flex; align-items: center; gap: 9px; border-top: 1px solid #f1f1f5; margin-top: 14px; padding-top: 13px; color: #55565c; font-size: 14px; cursor: pointer; }
+.infobar { display: flex; gap: 10px; align-items: center; background: #f0e4fd; border-radius: 14px; padding: 13px 14px; margin-top: 14px; font-size: 13.5px; font-weight: 600; color: #9a27f5; }
+.warnbar { display: flex; gap: 10px; background: #fdf0c7; border-radius: 14px; padding: 13px 14px; margin-top: 14px; font-size: 13px; }
+.warnbar .wi { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; }
+.warnbar b { display: block; font-size: 13.5px; }
+.warnbar .lbl-btn { display: inline-block; border: 1.5px solid #33343c; border-radius: 999px; padding: 5px 13px; font-size: 11.5px; font-weight: 700; margin-top: 8px; cursor: pointer; background: #fdf0c7; }
+
+/* модалки */
+.mask { position: absolute; inset: 0; background: rgba(24,24,30,.45); backdrop-filter: blur(2px); z-index: 70; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.mask.bottom { align-items: flex-end; padding: 0; }
+.modal { background: #fff; border-radius: 22px; padding: 26px 22px; text-align: center; width: 100%; animation: mup .22s ease; }
+@keyframes mup { from { transform: translateY(14px); opacity: 0; } }
+.modal h3 { font-size: 17.5px; margin-top: 14px; }
+.modal p { font-size: 13px; color: #55565c; margin-top: 10px; line-height: 1.5; }
+.spinner { width: 44px; height: 44px; border-radius: 50%; border: 4.5px solid transparent; border-top-color: #9a27f5; border-right-color: #9a27f5; margin: 0 auto; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sheet { background: #fff; border-radius: 22px 22px 0 0; padding: 10px 18px 26px; width: 100%; animation: shup .25s ease; max-height: 88%; overflow-y: auto; }
+@keyframes shup { from { transform: translateY(60px); opacity: .4; } }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: #d9dce3; margin: 4px auto 12px; }
+.paysheet .opt { display: flex; align-items: center; gap: 12px; padding: 15px 4px; border-bottom: 1px solid #f1f1f5; font-size: 15px; font-weight: 600; cursor: pointer; }
+.paysheet .opt .ic { width: 34px; height: 34px; border-radius: 10px; background: #f0e4fd; display: flex; align-items: center; justify-content: center; }
+.smssheet { text-align: center; }
+.smssheet .smic { width: 52px; height: 52px; border-radius: 14px; background: #22b86b; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; margin: 6px auto 14px; }
+.codeboxes { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+.codeboxes input { width: 48px; height: 54px; border-radius: 12px; border: none; background: #f2f3f6; text-align: center; font-size: 22px; font-weight: 700; outline: none; font-family: inherit; }
+.codeboxes input:focus { outline: 2px solid #9a27f5; }
+/* ДКП viewer */
+.dkpsheet { background: #f2f3f6; }
+.dkphead { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; padding: 6px 2px 10px; }
+.dkpdoc { background: #fff; border-radius: 6px; box-shadow: 0 4px 18px rgba(0,0,0,.12); padding: 20px 16px; font-size: 10.5px; line-height: 1.55; color: #33343c; }
+.dkpdoc h4 { text-align: center; font-size: 11px; }
+.dkpdoc .no { text-align: center; color: #8d93a1; margin: 4px 0 10px; }
+.dkpdoc b.cl { display: block; margin-top: 10px; font-size: 10.5px; }
+/* подпись */
+.signpad { border: 1.5px dashed #c9cdd6; border-radius: 14px; height: 300px; position: relative; margin-top: 14px; background: #f6f6f8; }
+.signpad canvas { width: 100%; height: 100%; border-radius: 14px; touch-action: none; }
+.signpad .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #b6bac4; font-size: 13.5px; pointer-events: none; }
+
+/* тёмные экраны (Госуслуги / ВТБО) */
+.darkscr { background: #232427; color: #fff; flex: 1; display: flex; flex-direction: column; }
+.darkscr .mid { flex: 1; display: flex; align-items: center; justify-content: center; }
+.gos-plate { background: #fff; border-radius: 12px; padding: 12px 22px; font-weight: 800; font-size: 17px; }
+.gos-plate .g1 { color: #1859c8; } .gos-plate .g2 { color: #e02238; }
+.darkscr .cap { padding: 0 22px 34px; }
+.darkscr .cap h3 { font-size: 19px; }
+.darkscr .cap p { color: #9b9ca3; font-size: 13.5px; margin-top: 8px; line-height: 1.5; }
+.vtbo-logo { width: 74px; height: 74px; border-radius: 20px; background: #0a2896; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 15px; letter-spacing: .5px; }
+
+/* успех */
+.qrblock { background: #fff; border-radius: 18px; padding: 18px; margin-top: 14px; text-align: center; }
+.qrblock svg { width: 168px; height: 168px; }
+.qrcap { background: #f2f3f6; border-radius: 12px; padding: 12px; font-size: 12.5px; color: #55565c; margin-top: 14px; line-height: 1.5; }
+.memo-num { flex: 0 0 24px; width: 24px; height: 24px; border-radius: 50%; background: #f0e4fd; color: #9a27f5; font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.memo { display: flex; gap: 11px; padding: 9px 0; font-size: 13.5px; align-items: flex-start; line-height: 1.4; }
+.memo .bd { padding-top: 3px; }
+
+@media (max-height: 900px) { .phone { transform: scale(.92); transform-origin: top center; } }
+@media (max-height: 820px) { .phone { transform: scale(.84); } }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>WB × ОФМ</b> кликабельный прототип: автокредит ОТП / ВТБ
+  <button onclick="resetAll()">↺ Сбросить прототип</button>
+</div>
+<div class="phone-wrap"><div class="phone"><div class="screen" id="scr"></div></div></div>
+<script>
+"use strict";
+/* ============================= состояние ============================= */
+const S0 = () => ({
+  screen: 'wb-search',
+  wb: null,            // null|created|review|approved|cancelled|pv|pvdone|sign|paid
+  site: 'calc',        // текущий шаг на сайте (куда возвращает «Заполнить заявку»)
+  bank: null,          // 'otp' | 'vtb'
+  vtbClient: null,     // true|false
+  ordersOpen: true,    // плашка в «Заказах» развёрнута
+  cart: 0,             // товаров в корзине (для бейджа на иконке)
+  cartAgree: true,
+  calc: { dp: 1000000, years: 8 },
+  s1: { dp: 200000, months: 84, c1: true, c2: true, c3: true },
+  s2: { phone: '', email: '', same: false, addr2: 'г.Москва, ул.Пушкина, д.15  кв.9' },
+  s3: { emp: '', sphere: '', org: '', wphone: '', waddr: '', wdate: '', pos: '', income: '', extra: false },
+  s4: { edu: '', fam: '', kids: '', cname: '', cphone: '', crel: '' },
+  offers: { dp: 1200000, months: 84, ready: false },
+  docs: { d1: null, d2: null, sent: false },
+  dkp: { signed: false },
+  pv: { paid: false },
+  contract: { ready: false, signed: false, expired: false },
+  modal: null,
+});
+let S = S0();
+function resetAll(){ S = S0(); render(); }
+
+/* ============================= утилиты ============================= */
+const fmt = n => Math.round(n).toLocaleString('ru-RU');
+function annuity(p, months, apr){ const r = apr/12/100; return p*r/(1-Math.pow(1+r,-months)); }
+const $ = sel => document.querySelector(sel);
+function go(id){ S.screen = id; S.modal = null; render(); }
+function setModal(m){ S.modal = m; render(); }
+function esc(s){ return (s??'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+/* маска телефона */
+function phoneMask(v){
+  const d = v.replace(/\D/g,'').replace(/^[78]/,'').slice(0,10);
+  let out = '+7';
+  if (d.length) out += ' (' + d.slice(0,3);
+  if (d.length >= 3) out += ') ' + d.slice(3,6);
+  if (d.length >= 6) out += '-' + d.slice(6,8);
+  if (d.length >= 8) out += '-' + d.slice(8,10);
+  return out;
+}
+
+/* ============================= общие куски ============================= */
+const sb = (light=false) => `
+  <div class="sb ${light?'light':''}"><span>9:41</span><span class="icons">▮▮▮ ⌁ ▰</span></div>`;
+
+const pill = () => `<div class="backpill" onclick="toWb()">‹ Wildberries</div>`;
+
+function toWb(){
+  // возврат из сайта в приложение WB на актуальный экран статуса
+  go(S.wb ? 'wb-orders' : (S.cart>0 ? 'wb-cart' : 'wb-product'));
+}
+function resumeSite(){ go('site-' + S.site); }
+
+const carSVG = (h=44) => `
+<svg class="car" viewBox="0 0 240 74" style="height:${h}px" xmlns="http://www.w3.org/2000/svg">
+  <path d="M18 58 C30 40 52 26 92 24 C132 22 160 28 180 40 C204 44 226 48 228 56 L226 62 L14 62 Z" fill="#b9c3cd"/>
+  <path d="M96 27 C126 25 152 30 170 40 L96 40 Z" fill="#8fa0b0"/>
+  <path d="M60 32 C74 26 88 25 94 26 L92 40 L52 40 Z" fill="#9fb0bf"/>
+  <circle cx="62" cy="60" r="12" fill="#2c2f36"/><circle cx="62" cy="60" r="5.5" fill="#8b95a2"/>
+  <circle cx="186" cy="60" r="12" fill="#2c2f36"/><circle cx="186" cy="60" r="5.5" fill="#8b95a2"/>
+</svg>`;
+
+const carCard = (mini=false, h=44) => `
+<div class="carimg ${mini?'mini':''}">
+  <div class="brand"><span class="v">V</span> CHANGAN</div>
+  <div class="banner">КМ/Ч<span class="slash"></span></div>
+  ${carSVG(h)}
+  <div class="uni">UNI-K</div>
+  <div class="dealer">Официальный дилер</div>
+</div>`;
+
+const tabbar = (active='home') => `
+<div class="tabbar">
+  <div class="t ${active==='home'?'active':''}">⌂</div>
+  <div class="t">☰</div>
+  <div class="t"><span class="bank">банк</span></div>
+  <div class="t ${active==='cart'?'active':''}" onclick="openCart()">🛒${S.cart>0?`<span class="cartdot">${S.cart}</span>`:''}</div>
+  <div class="t">👤</div>
+</div>`;
+function addToCart(){ S.cart = 1; render(); }
+function openCart(){ if (S.cart>0) go('wb-cart'); }
+
+const demoChip = (label, fn) => `<div class="demo-row"><span class="demo" onclick="${fn}">⚙ демо: ${label}</span></div>`;
+
+/* ============================= WB: экраны ============================= */
+function wbSearch(){
+  const card = () => `
+  <div class="pcard">
+    <div class="ph">${carCard(false, 40)}
+      <div class="fav">♡</div>
+      <div class="badges"><span class="bdg-sale">−82%</span><span class="bdg-credit">В АВТОКРЕДИТ</span></div>
+    </div>
+    <div class="price">2 184 000 ₽</div>
+    <div class="stockline">Осталось меньше 10 шт.</div>
+    <div class="stockbar"><i></i></div>
+    <div class="seller"><span class="vcheck">✓</span> AutoMir</div>
+    <div class="pname">Livan S6 Pro 1.5 Робот, 2…</div>
+    <div class="rating"><span class="star">★</span><b style="color:#1b1b21">4,7</b> · 88 оценок</div>`;
+  return `
+  <div class="wb-head">
+    ${sb(true)}
+    <div class="wb-nav"><span class="ico" >‹</span><span class="ttl">Поиск</span><span class="ico">⇅</span><span class="ico">⚌</span></div>
+    <div class="wb-search-field">🔍 <input value="Livan S6 Pr" oninput=""> <span class="x">✕</span></div>
+  </div>
+  <div style="background:#fff; flex:1">
+    <div class="chips"><span class="chip">Livan S6 Pro коврики</span><span class="chip">livan x6 pro</span><span class="chip">livan s6 p…</span></div>
+    <div class="chips" style="padding-top:8px"><span class="chip">Срок доставки</span><span class="chip">Категория</span></div>
+    <div class="cards2">
+      ${card()}<div style="margin-top:8px" onclick="go('wb-product')"><button class="btn btn-wb" style="border-radius:12px; padding:12px">🛒 Самовывоз</button></div></div>
+      ${card()}<div style="margin-top:8px" onclick="go('wb-product')"><button class="btn btn-wb" style="border-radius:12px; padding:12px">🛒 27 июня</button></div></div>
+    </div>
+  </div>
+  ${tabbar('home')}
+  <div class="home-ind"><i></i></div>`;
+}
+
+function wbProduct(){
+  return `
+  ${sb()}
+  <div class="wb-nav2"><span class="ico" onclick="go('wb-search')">‹</span><span class="sp"></span><span class="ico">♡</span><span class="ico">⤴</span></div>
+  <div style="flex:1; overflow-y:auto">
+    <div class="hero">${carCard(false, 120)}<div class="ar">⛶</div></div>
+    <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><span class="sim">Похожие ›</span></div>
+    <div style="padding:2px 14px 0">
+      <div class="price" style="font-size:22px">2 184 000 ₽</div>
+      <div class="pay-badge" onclick="go('wb-credit-info')">🚘 ПО 50 000 ₽ В МЕСЯЦ ›</div>
+      <div style="display:flex; align-items:center; gap:10px; margin-top:10px">
+        <div class="stockbar" style="flex:1; height:4px"><i style="width:14%"></i></div>
+        <span class="stockline" style="margin:0">Меньше 10 шт</span>
+      </div>
+    </div>
+    <div class="sect pgray" style="display:flex; gap:10px; align-items:center">
+      <div class="color-pick"><div class="th">${carCard(true, 20)}</div><span class="small dim">Белый</span></div>
+    </div>
+    <div class="tile2">
+      <div class="mrow"><div><div style="font-weight:700"><span class="star">★</span> 4,9</div><div class="small dim">26 оценок</div></div><span class="chev">›</span></div>
+      <div class="mrow"><div><div style="font-weight:700">💬 7</div><div class="small dim">Вопросов</div></div><span class="chev">›</span></div>
+    </div>
+    <div class="mrow"><div><div style="font-weight:700">23 сентября</div><div class="small dim">Склад продавца</div></div><span class="chev" style="color:#8d93a1">Условия ›</span></div>
+    <div class="mrow" onclick="go('wb-credit-info')">
+      <div class="wheel-ic">🚘<span class="ok">ОДОБРЕН</span></div>
+      <div><div style="font-weight:700">В автокредит</div><div class="small dim">От 50 000 ₽ в месяц</div></div>
+      <span class="chev">›</span>
+    </div>
+    <div style="height:10px"></div>
+  </div>
+  <div class="wb-btns2">
+    <button class="btn btn-orange" onclick="go('wb-credit-info')">В автокредит</button>
+    ${S.cart>0
+      ? `<button class="btn btn-wb" style="border-radius:999px" onclick="openCart()">Перейти в корзину</button>`
+      : `<button class="btn btn-wb" style="border-radius:999px" onclick="addToCart()">В корзину</button>`}
+  </div>
+  ${tabbar('home')}
+  <div class="home-ind"><i></i></div>`;
+}
+
+function wbCreditInfo(){
+  const steps = [
+    ['Выберите адрес','Откуда заберёте машину, когда получите кредит'],
+    ['Подтвердите личность','Авторизуйтесь на Госуслугах'],
+    ['Выберите условия кредита','Заполните заявку — отправим её банки и покажем предложения'],
+    ['Внесите первоначальный взнос','Так вы забронируете машину'],
+    ['Подпишите кредитный договор','Сделка с банком будет онлайн'],
+    ['Заберите автомобиль из салона','Когда полностью оплатите заказ, машина будет ждать вас по выбранному адресу доставки'],
+  ];
+  return `
+  <div class="mag">${sb(true)}
+    <div class="wb-nav" style="padding-top:2px"><span class="ico" onclick="go('wb-product')" style="color:#fff">‹</span></div>
+  </div>
+  <div style="flex:1; overflow-y:auto; background:linear-gradient(180deg,#e60077 0, #e60077 1px, #f2f3f6 1px)">
+    <div class="wb-credit-card" style="margin-top:-20px; padding:18px 16px">
+      <h2 style="font-size:20px">Кредит от банков-партнёров</h2>
+      <p class="dim" style="font-size:13.5px; margin-top:6px">Поможем получить одобрение и подписать договор с банком онлайн</p>
+      <div class="payblock"><div class="val">50 000 ₽ в месяц</div><div class="lbl" style="margin-top:2px">Под 5% годовых на 2 года</div></div>
+    </div>
+    <div class="sect">
+      <h2 style="font-size:17px">Покупайте выгодно</h2>
+      <div class="benef"><span class="ic">✦</span><div><b style="font-size:14px">Ставки от 0,01%</b><div class="small dim">По программам от производителей</div></div></div>
+      <div class="benef"><span class="ic">📁</span><div><b style="font-size:14px">Первый взнос от 10%</b><div class="small dim">Без скрытых комиссий и платежей</div></div></div>
+      <div class="benef"><span class="ic">💻</span><div><b style="font-size:14px">Всё онлайн</b><div class="small dim">Одобрение и выдача кредита без визита к дилеру или в банк</div></div></div>
+    </div>
+    <div class="sect">
+      <h2 style="font-size:17px; line-height:1.3">Как купить машину на Wildberries в кредит</h2>
+      <div style="margin-top:8px">
+        ${steps.map((s,i)=>`<div class="step6"><span class="n">${i+1}</span><div><b style="font-size:14px">${s[0]}</b><div class="small dim" style="margin-top:2px; line-height:1.4">${s[1]}</div></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="sect"><h2 style="font-size:17px">Ответы на вопросы</h2></div>
+    <div style="height:8px"></div>
+  </div>
+  <div style="padding:10px 14px 0">
+    <button class="btn btn-dark" onclick="S.site='calc'; go('site-calc')">Оформить кредит</button>
+    <div class="finefoot">Подбирает и оформляет кредит АО «Открытый финансовый маркетплейс», ИНН 9710090580</div>
+  </div>
+  <div class="home-ind"><i></i></div>`;
+}
+
+function wbCart(){
+  return `
+  ${sb()}
+  <div class="wb-nav2" style="padding-bottom:2px"><span class="ico" onclick="go('wb-product')" style="color:#a232e8">‹</span>
+    <div style="flex:1; text-align:center"><b>Title</b><div class="small dim">1 товар, 2 184 000 ₽</div></div>
+    <span style="width:24px"></span></div>
+  <div style="flex:1; overflow-y:auto; background:#f2f3f6; padding-bottom:10px">
+    <div class="sect" style="margin-top:10px">
+      <div class="cart-addr">📍<div style="flex:1">
+        <div class="small dim">Самовывоз из Чанган Центр КМ/Ч-Сев…</div>
+        <b style="font-size:14.5px; line-height:1.35">Москва, Бусиново, МКАД,<br>78-й километр, 2к4</b>
+      </div><span style="color:#a232e8">✎</span></div>
+    </div>
+    <div class="sect">
+      <b style="font-size:15px">Можно забрать сегодня с 12:00 до 21:00</b>
+      <div class="small dim" style="margin-top:2px">Срок хранения — 7 дней</div>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:12px">
+        <div style="width:44px">${carCard(true, 16)}</div>
+        <div style="flex:1"><div style="font-size:13.5px">Автомобиль Changan UNI-S / CS55PLU…</div>
+          <div class="stockline">Осталось 8 шт</div></div>
+        <span class="small dim">1 шт</span>
+      </div>
+    </div>
+    <div class="sect">
+      <b style="font-size:15px">Способы оплаты</b>
+      <div class="payways">
+        <div class="payway pw-wallet"><span class="ic">🔒</span><b>WB Кошелёк</b>2 560 ₽</div>
+        <div class="payway pw-partner"><span class="ic">🚘</span><b>Привязать</b>От партнёра</div>
+        <div class="payway pw-card"><span class="ic">💳</span><b>Привязать</b>карту</div>
+      </div>
+    </div>
+    <div class="mrow">🎟 <b style="font-size:14.5px">Промокоды</b><span class="chev">›</span></div>
+    <div class="sect">
+      <div class="totals">
+        <div class="t"><span>Итого</span><span>2 184 000 ₽</span></div>
+        <div><span class="dim">1 товар на сумму</span><span>2 184 000 ₽</span></div>
+        <div><span class="dim">Моя скидка</span><span>-816 000 ₽</span></div>
+      </div>
+      <div class="agree">
+        <span class="cbx ${S.cartAgree?'on':''}" onclick="S.cartAgree=!S.cartAgree; render()">${S.cartAgree?'✓':''}</span>
+        <span>Согласен с условиями <a class="link">Правил пользования торговой площадкой</a> и правилами возврата</span>
+      </div>
+    </div>
+  </div>
+  <div style="padding:10px 14px 0">
+    <button class="btn btn-orange" ${S.cartAgree?'':'style="opacity:.5" disabled'} onclick="orderCreate()">Оформить заказ</button>
+  </div>
+  <div class="home-ind"><i></i></div>`;
+}
+function orderCreate(){ S.wb = 'created'; S.site = 'calc'; go('wb-orders'); }
+
+/* ---- «Заказы»: единый экран со статусной плашкой ---- */
+const WBST = {
+  created:  { h:'Заказ создан',  d:'Заполните заявку на кредит. Если не сделать это через <b>23:59:59</b>, заказ отменится', btn:'Заполнить заявку', link:null },
+  review:   { h:'Заявку рассматривают', d:'Дождитесь решения от банков-партнёров', btn:null, link:'Узнать подробнее' },
+  approved: { h:'Заявка одобрена', d:'Выберите условия кредита и подтвердите личность. Если не сделать это через <b>20:59:59</b>, заказ отменится', btn:'Выбрать условия', link:null },
+  cancelled:{ h:'Заказ отменён', d:'К сожалению, ни один банк не одобрил вашу заявку — попробуйте подать её снова', btn:null, link:'Узнать подробнее' },
+  pv:       { h:'Внесите первоначальный взнос', d:'Забронируем автомобиль, и вы сможете подписать кредитный договор. Если не внести взнос через <b>17:59:59</b>, заказ отменится', btn:'Внести 1 200 000 ₽', btn2:'Посмотреть проект ДКП', link:null },
+  pvdone:   { h:'Первоначальный взнос внесён', d:'Банк уже готовит кредитный договор — обычно это не занимает много времени. Когда всё будет готово, вы получите СМС', btn:null, link:'Проверить статус' },
+  sign:     { h:'Подпишите договор', d:'Если не сделать это через <b>22:59:59</b>, заказ автоматически отменится. Сумма первоначального взноса вернётся на вашу карту', btn:'Подписать', link:null },
+  paid:     { h:'Заказ оплачен', d:'Банк подтвердил сделку и подписал кредитный договор — уже готовим для вас автомобиль', btn:null, link:'Посмотреть документы' },
+};
+function wbPlashkaAction(){
+  const st = S.wb;
+  if (st === 'created') resumeSite();
+  else if (st === 'approved') { S.site = 'offers'; go('site-offers'); }
+  else if (st === 'pv') { S.site = 'deal'; go('site-deal'); }
+  else if (st === 'sign') signEntry();
+}
+function wbPlashkaLink(){
+  const st = S.wb;
+  if (st === 'review') { S.site = 'offers'; go('site-offers'); }
+  else if (st === 'pvdone') { S.site = 'deal'; go('site-deal'); }
+  else if (st === 'paid') go('site-success');
+  else if (st === 'cancelled') { S.site='offers'; S.offers.ready=false; go('site-offers'); }
+}
+function signEntry(){
+  if (S.bank === 'otp') { S.site = 'otp-sign'; go('site-otp-sign'); }
+  else {
+    if (S.vtbClient === null) setModal('vtb-question');
+    else if (S.vtbClient) { S.site = 'vtb-sign'; go('site-vtb-sign'); }
+    else { S.site = 'vtb-client'; go('site-vtb-client'); }
+  }
+}
+
+function transitBlock(short=false){
+  return `
+  <div class="transit">
+    <h3>В пути</h3>
+    <div class="tr-card">
+      <div class="tr-date"><b>15</b><span>окт<br>вт</span></div>
+      <div class="tr-items">
+        <div class="tr-it"><div class="im" style="background:#e8c8c8"><span class="sz">S</span><span class="sz" style="top:20px">3 ШТ.</span><span class="np">НЕ ОПЛАЧЕН</span></div><div class="pr">1 730 ₽</div><div class="st st-p">В пути ›</div></div>
+        <div class="tr-it"><div class="im" style="background:#dfe9f2"><span class="sz">S</span><span class="sz" style="top:20px">5/42</span><span class="np">НЕ ОПЛАЧЕН</span></div><div class="pr">2 440 ₽</div><div class="st st-o">Задержка ›</div></div>
+        <div class="tr-it"><div class="im" style="background:#eceef2"></div><div class="pr">320 ₽</div><div class="st st-p">Сборка ›</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="pay-btn">К оплате 2 440 ₽</div>
+  ${short ? '' : `
+  <div class="adbanner"><div class="ph"></div><div class="tx"><span class="k">KARCHER</span><br>НА ВСЕ АППАРАТЫ ДЛЯ ЧИСТКИ<span class="off">20% СКИДКА</span></div><span class="adlbl">Реклама ⋮</span></div>`}`;
+}
+
+function wbOrders(){
+  const st = WBST[S.wb] || WBST.created;
+  const open = S.ordersOpen;
+  const demo = {
+    created: demoChip('банки взяли заявку в работу (после отправки анкеты)', "S.wb='review'; render()"),
+    review: demoChip('СМС — есть предложения банков', "S.wb='approved'; S.offers.ready=true; render()") +
+            demoChip('все банки отказали', "S.wb='cancelled'; render()"),
+    approved: '', cancelled: demoChip('подать заявку снова', "S.wb='created'; S.site='calc'; render()"),
+    pv: '', pvdone: demoChip('СМС — кредитный договор готов', "S.wb='sign'; S.contract.ready=true; render()"),
+    sign: '', paid: '',
+  }[S.wb] || '';
+  return `
+  ${sb()}
+  <div class="wb-nav2" style="padding-bottom:4px"><span class="ico" style="color:#a232e8">‹</span>
+    <div style="flex:1; text-align:center; font-weight:600">Заказы</div><span style="width:24px"></span></div>
+  <div style="flex:1; overflow-y:auto; background:#f2f3f6; padding-bottom:8px">
+    <div class="alert-orange"><span class="i">!</span>
+      <div style="font-size:12.5px"><b>В кошельке не хватает <span style="color:#ff7b1c">2 183 000 ₽</span></b><div class="dim">Пополните, чтобы сохранить скидку</div></div>
+      <span class="go">›</span></div>
+    <div class="mrow" style="border-radius:14px">🛍 <b style="font-size:14.5px">Покупки</b><span class="chev">›</span></div>
+    <div class="ord-plash">
+      ${open ? '' : `<div class="carrow" onclick="S.ordersOpen=true; render()"><span class="sq"></span> Changan 123F2 <span class="chev">▾</span></div>`}
+      <div style="display:flex; align-items:flex-start">
+        <h3 style="flex:1; ${open?'':'margin-top:8px'}">${st.h}</h3>
+        ${open ? `<span class="chev dim" style="cursor:pointer" onclick="S.ordersOpen=false; render()">▴</span>` : ''}
+      </div>
+      <div class="desc">${st.d}</div>
+      ${st.link ? `<div class="link" style="font-size:13.5px; margin-top:6px" onclick="wbPlashkaLink()">${st.link}</div>` : ''}
+      ${open ? `<div class="ord-photo" onclick="go('wb-details')">${carCard(true, 26)}<div style="margin-top:4px"><span class="bdg-kredit">КРЕДИТ</span></div></div><div class="ord-price">2 184 000 ₽</div>` : ''}
+      ${st.btn ? `<button class="btn btn-wb" style="border-radius:12px; margin-top:12px; padding:13px" onclick="wbPlashkaAction()">${st.btn}</button>` : ''}
+      ${st.btn2 ? `<button class="btn btn-lite" style="border-radius:12px; margin-top:8px; padding:13px" onclick="setModal('dkp-view-ro')">${st.btn2}</button>` : ''}
+    </div>
+    ${demo}
+    ${transitBlock()}
+  </div>
+  <div class="home-ind"><i></i></div>
+  ${modalHtml()}`;
+}
+
+function wbDetails(){
+  const paid = S.wb === 'paid';
+  const st = paid ? WBST.paid : WBST[S.wb] || WBST.created;
+  return `
+  ${sb()}
+  <div class="wb-nav2" style="padding-bottom:4px"><span class="ico" onclick="go('wb-orders')" style="color:#a232e8">‹</span>
+    <div style="flex:1; text-align:center; font-weight:600">Детали заказов</div><span style="width:24px"></span></div>
+  <div style="flex:1; overflow-y:auto; background:#f2f3f6; padding-bottom:8px">
+    <div class="det-thumb">${carCard(true, 18)}</div>
+    <div class="det-prod"><div class="sq"></div>
+      <div><b style="font-size:15px">2 184 000 ₽</b> <span class="bdg-kredit">КРЕДИТ</span>
+        <div class="small dim" style="margin-top:2px">Бренд · Название автомобиля</div></div></div>
+    <div class="sect">
+      <b style="font-size:17px">${st.h}</b>
+      <div class="desc" style="font-size:13px; color:#43454d; margin-top:6px; line-height:1.45">${st.d}</div>
+      ${st.link ? `<div class="link" style="font-size:13.5px; margin-top:6px" onclick="wbPlashkaLink()">${st.link}</div>` : ''}
+      ${st.btn ? `<button class="btn btn-white" style="margin-top:12px; color:#a232e8" onclick="wbPlashkaAction()">${st.btn}</button>` : ''}
+      <div class="trackline">
+        <div class="ics"><span class="ic">🛍</span><span class="ln"></span><span class="ic" style="color:#b6bac4">✉</span><span class="ln"></span><span class="ic" style="color:#b6bac4">🏬</span></div>
+        <div class="cap"><span>Вы оформили заказ</span><span class="dim">14 окт, 14:12</span></div>
+      </div>
+      <div class="det-row">Детали оплаты<span class="chev">›</span></div>
+      <div class="det-row" style="border-bottom:none">Условия отказа и возврата<span class="chev">›</span></div>
+      <div class="two-btn"><button class="btn btn-white" style="color:#a232e8">Задать вопрос</button><button class="btn btn-white" style="color:#a232e8">Отменить</button></div>
+    </div>
+    <div class="transit" style="padding-bottom:0"><h3>Подобрали для вас</h3></div>
+    <div class="pickcards"><div class="pc"><span class="h">♡</span></div><div class="pc"><span class="h">♡</span></div></div>
+  </div>
+  <div class="home-ind"><i></i></div>`;
+}
+
+/* ============================= САЙТ ОФМ ============================= */
+const siteHead = () => `
+  ${sb()}
+  ${pill()}
+  <div class="site-head"><span class="wb-logo">wildberries</span><span class="ofm-logo"><span class="o"></span> ОФМ</span></div>`;
+
+const siteFoot = () => `
+  <div class="site-foot">Открытый финансовый маркетплейс (ОФМ) - информационная система, использующая программно-технические
+  средства для обеспечения взаимодействия участников финансовых сделок посредством сети Интернет.
+  Оператором платформы является АО «Открытый финансовый маркетплейс» (ИНН 9710090580).<br>
+  Права на сайт принадлежат<br><a class="link">АО «Открытый финансовый маркетплейс»</a><br>(ИНН 9710090580).</div>`;
+
+const gosBadge = () => `
+  <span class="gos-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="7" rx="1.5" fill="#1859c8"/><rect x="13" y="4" width="8" height="7" rx="1.5" fill="#e02238"/><rect x="3" y="13" width="8" height="7" rx="1.5" fill="#e02238"/><rect x="13" y="13" width="8" height="7" rx="1.5" fill="#1859c8"/></svg></span>`;
+
+const appHeader = (step, title, sub='Changan UNI-S Tech 2025 за 2 184 000 ₽', done=0) => `
+  <div class="stepmeta">Шаг ${step} из 7</div>
+  <h1 style="padding-top:2px; font-size:21px">${title}</h1>
+  <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">${sub}</div>
+  <div class="progress">
+    ${[0,1,2,3].map(i=>`<span class="pd ${i<done?'done':''}"></span>${i<3?`<span class="pl ${i<done-1?'done':''}"></span>`:''}`).join('')}
+  </div>
+  <div class="shield"><span class="ic">🛡</span><span>Ваши данные не попадут третьим лицам<br>без вашего разрешения</span></div>`;
+
+/* ---- Калькулятор ---- */
+function siteCalc(){
+  const price = 5000000;
+  const pay = annuity(price - S.calc.dp, S.calc.years*12, 22.9);
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <h1>Changan UNI-K Tech 2025<br>за 5 000 000 ₽</h1>
+      <div class="sub">Онлайн одобрение кредита от 5 минут.<br>Без комиссий.</div>
+      <div class="scard">
+        <h2>Подберите условия</h2>
+        <div class="gfield"><label>Первоначальный взнос</label>
+          <input inputmode="numeric" value="${fmt(S.calc.dp)} ₽" onchange="S.calc.dp = Math.min(4500000, Math.max(0, +this.value.replace(/\\D/g,'')||0)); render()"></div>
+        <div style="font-size:13px; font-weight:600; margin-top:14px">Срок</div>
+        <div class="termchips">
+          ${[8,7,6,5,4,3,2,1].map(y=>`<span class="tc ${S.calc.years===y?'on':''}" onclick="S.calc.years=${y}; render()">${y} ${y===1?'год':(y<5?'года':'лет')}</span>`).join('')}
+        </div>
+        <div class="payblock"><div class="lbl">Ежемесячный платеж</div><div class="val">от ${fmt(pay)} ₽</div></div>
+      </div>
+      <button class="btn btn-site" style="margin-top:18px; position:relative" onclick="go('site-gos')">Продолжить <span style="position:absolute; right:8px">${gosBadge()}</span></button>
+      <div class="legal">Нажимая на кнопку «Продолжить»,<br>вы подписываете своей электронной подписью <a class="link">согласия</a></div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* ---- Госуслуги ---- */
+function siteGos(){
+  setTimeout(()=>{ if (S.screen==='site-gos'){ S.site='step1'; go('site-step1'); } }, 2200);
+  return `
+  <div class="darkscr">
+    ${sb(true)}
+    ${pill()}
+    <div class="mid"><div class="gos-plate"><span class="g1">гос</span><span class="g2">услуги</span></div></div>
+    <div class="cap">
+      <h3>Авторизация в Госуслугах</h3>
+      <p>Клиент авторизуется через Госуслуги<br>и передает данные для предзаполнения<br>анкеты.</p>
+    </div>
+    <div class="home-ind on-dark"><i></i></div>
+  </div>`;
+}
+
+/* ---- Шаг 1: условия + паспорт ---- */
+function siteStep1(){
+  const price = 2184000;
+  const pay = annuity(price - S.s1.dp, S.s1.months, 25.2);
+  const tgl = (key, html) => `
+    <div class="tglrow"><span class="tgl ${S.s1[key]?'on':''}" onclick="S.s1.${key}=!S.s1.${key}; render()"><i></i></span><span>${html}</span></div>`;
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      ${appHeader(1, 'Заявка на автокредит', undefined, 1)}
+      <div class="scard">
+        <h2>Укажите условия</h2>
+        <div class="hint">и мы подберем лучшие предложения</div>
+        <div class="gfield"><label>Первоначальный взнос*</label>
+          <input inputmode="numeric" value="${fmt(S.s1.dp)}" onchange="S.s1.dp=Math.min(2000000,Math.max(0,+this.value.replace(/\\D/g,'')||0)); render()"><span class="rub">₽</span></div>
+        <input class="slider" type="range" min="100000" max="2000000" step="10000" value="${S.s1.dp}" oninput="S.s1.dp=+this.value" onchange="render()">
+        <div class="gfield"><label>Срок кредита</label><input readonly value="${S.s1.months} мес"></div>
+        <input class="slider" type="range" min="12" max="96" step="12" value="${S.s1.months}" oninput="S.s1.months=+this.value" onchange="render()">
+        <div style="margin-top:14px"><div class="small dim">Ежемесячный платеж</div><b style="font-size:17px">от ${fmt(pay)} ₽</b></div>
+        <div class="recoblock"><span class="i">ⓘ</span><span><b>Рекомендованный доход —<br>от 100 000 р/мес</b><br>
+          Если доход ниже, увеличьте взнос или срок, это повысит шансы на одобрение кредита, либо продолжите без изменений</span></div>
+        ${tgl('c1','Подтверждаю достоверность <a class="link">указанных данных, предоставленных в целях ФЗ №115-ФЗ (ПОД/ФТ)</a>')}
+        ${tgl('c2','Даю согласие <a class="link">на получение кредитного отчёта в БКИ</a>')}
+        ${tgl('c3','Даю согласие <a class="link">на обработку персональных данных</a>')}
+        <button class="btn btn-site" style="margin-top:16px" ${S.s1.c1&&S.s1.c2&&S.s1.c3?'':'disabled'} onclick="S.site='step2'; go('site-step2')">Далее</button>
+      </div>
+      <div class="acc open" id="acc-pass">
+        <div class="acc-h" onclick="this.parentElement.classList.toggle('open')">Паспортные данные<span class="chev">⌃</span></div>
+        <div class="acc-b">
+          <div class="pgrid">
+            <div class="pitem"><label>Фамилия</label><div>Иванов</div></div>
+            <div class="pitem"><label>Имя</label><div>Иван</div></div>
+            <div class="pitem wide"><label>Отчество</label><div>Иванович</div></div>
+            <div class="pitem"><label>Дата рождения</label><div>16.01.1994</div></div>
+            <div class="pitem"><label>Место рождения</label><div>Гор. Москва</div></div>
+            <div class="pitem"><label>Серия и номер паспорта</label><div>40 99 233675</div></div>
+            <div class="pitem"><label>Дата выдачи</label><div>04.02.2020</div></div>
+            <div class="pitem wide"><label>Кем выдан</label><div>Отделом внутренних дел Одинцовского района города Москвы</div></div>
+            <div class="pitem wide"><label>Код подразделения</label><div>777-999</div></div>
+            <div class="pitem"><label>Гражданство</label><div>Российская Федерация</div></div>
+            <div class="pitem"><label>Пол</label><div>М</div></div>
+          </div>
+          <div class="gosnote">🔄<span>Информацию в этом блоке можно изменить в личном кабинете Госуслуг</span></div>
+        </div>
+      </div>
+      <div class="acc open">
+        <div class="acc-h" onclick="this.parentElement.classList.toggle('open')">Документы<span class="chev">⌃</span></div>
+        <div class="acc-b"><div class="pgrid">
+          <div class="pitem wide"><label>СНИЛС</label><div>123-456-789 01</div></div>
+          <div class="pitem wide"><label>ИНН</label><div>781633655432</div></div>
+        </div></div>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* ---- Шаг 2: контакты и адрес ---- */
+function siteStep2(){
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      ${appHeader(2, 'Заявка на автокредит', undefined, 2)}
+      <div class="scard">
+        <h2 style="font-size:16px">Заполните контактные данные</h2>
+        <div class="gfield"><label>Номер телефона*</label>
+          <input id="f-phone" inputmode="tel" placeholder="+7 (999) 999-99-99" value="${esc(S.s2.phone)}" oninput="this.value=phoneMask(this.value)" onchange="S.s2.phone=this.value"></div>
+        <div class="gfield"><label>Электронная почта*</label>
+          <input id="f-email" type="email" placeholder="example@gmail.com" value="${esc(S.s2.email)}" onchange="S.s2.email=this.value"></div>
+      </div>
+      <div class="scard">
+        <h2 style="font-size:16px">Место жительства</h2>
+        <div class="gfield"><label>Адрес регистрации*</label><input value="г.Москва, ул.Пушкина, д.15  кв.9"></div>
+        <div class="gfield"><label>Дата регистрации*</label><input value="04.09.2004"></div>
+        <div class="tglrow"><span class="tgl ${S.s2.same?'on':''}" onclick="S.s2.same=!S.s2.same; render()"><i></i></span>
+          <span>Фактический адрес совпадает с адресом регистрации</span></div>
+        ${S.s2.same ? '' : `<div class="gfield"><label>Адрес регистрации*</label>
+          <input id="f-addr2" value="${esc(S.s2.addr2)}" onchange="S.s2.addr2=this.value"></div>`}
+      </div>
+      <div class="navrow">
+        <button class="backround" onclick="S.site='step1'; go('site-step1')">‹</button>
+        <button class="btn btn-site" onclick="step2Next()">Далее</button>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function step2Next(){
+  const bad = [];
+  if (S.s2.phone.replace(/\D/g,'').length < 11) bad.push('f-phone');
+  if (!/.+@.+\..+/.test(S.s2.email)) bad.push('f-email');
+  if (!S.s2.same && !S.s2.addr2.trim()) bad.push('f-addr2');
+  if (bad.length) return markErr(bad);
+  S.site = 'step3'; go('site-step3');
+}
+function markErr(ids){
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.closest('.gfield,.ofield')?.classList.add('err'); });
+}
+
+/* ---- Шаг 3: работа и доход ---- */
+function siteStep3(){
+  const sel = (id, label, val, key, opts, hint='') => `
+    <div class="ofield"><label>${label}</label>
+      <select id="${id}" onchange="S.s3.${key}=this.value; render()">
+        ${val===''?'<option value="" selected hidden></option>':''}
+        ${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}
+      </select><span class="chev">▾</span></div>${hint?`<div class="fhint">${hint}</div>`:''}`;
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      ${appHeader(2, 'Заявка на автокредит', undefined, 2)}
+      <div class="scard">
+        <h2 style="font-size:16px">Работа и доход</h2>
+        ${sel('f-emp','Тип занятости', S.s3.emp, 'emp', ['Полная занятость','Частичная занятость','Самозанятый','ИП','Пенсионер','Не работаю'])}
+        ${sel('f-sphere','Сфера деятельности*', S.s3.sphere, 'sphere', ['Информационные технологии','Торговля','Производство','Финансы','Госслужба','Другое'])}
+        ${sel('f-org','Наименование организации*', S.s3.org, 'org', ['ПАО СБЕРБАНК','АО «Открытый финансовый маркетплейс»','ООО «Вайлдберриз»','Другая организация'])}
+        <div class="ofield"><label>Телефон работодателя</label>
+          <input inputmode="tel" placeholder="" value="${esc(S.s3.wphone)}" oninput="this.value=this.value?phoneMask(this.value):''" onchange="S.s3.wphone=this.value"></div>
+        <div class="ofield"><label>Адрес работодателя</label>
+          <input value="${esc(S.s3.waddr)}" onchange="S.s3.waddr=this.value"></div>
+        <div class="ofield"><label>Дата начала работы</label>
+          <input id="f-wdate" placeholder="дд.мм.гггг" value="${esc(S.s3.wdate)}" onchange="S.s3.wdate=this.value"><span class="chev">📅</span></div>
+        ${sel('f-pos','Должность', S.s3.pos, 'pos', ['Разработчик','Менеджер','Аналитик','Руководитель','Специалист','Другое'],
+          'Если вы не можете найти свою должность,<br>укажите «другое»')}
+        <div class="ofield"><label>Основной доход*</label>
+          <input id="f-income" inputmode="numeric" value="${esc(S.s3.income)}" oninput="this.value=this.value.replace(/[^\\d ]/g,'')" onchange="S.s3.income=this.value"></div>
+        <div class="tglrow"><span class="tgl ${S.s3.extra?'on':''}" onclick="S.s3.extra=!S.s3.extra; render()"><i></i></span>
+          <span style="margin-top:3px">Дополнительный доход</span></div>
+        ${S.s3.extra ? `<div class="ofield"><label>Дополнительный доход, ₽/мес</label><input inputmode="numeric"></div>` : ''}
+      </div>
+      <div class="navrow">
+        <button class="backround" onclick="S.site='step2'; go('site-step2')">‹</button>
+        <button class="btn btn-site" onclick="step3Next()">Далее</button>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function step3Next(){
+  const bad = [];
+  if (!S.s3.sphere) bad.push('f-sphere');
+  if (!S.s3.org) bad.push('f-org');
+  if (!S.s3.income.trim()) bad.push('f-income');
+  if (bad.length) return markErr(bad);
+  S.site = 'step4'; go('site-step4');
+}
+
+/* ---- Шаг 4: доп. информация ---- */
+function siteStep4(){
+  const sel = (id, label, val, key, opts) => `
+    <div class="ofield"><label>${label}</label>
+      <select id="${id}" onchange="S.s4.${key}=this.value">
+        ${val===''?'<option value="" selected hidden></option>':''}
+        ${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}
+      </select><span class="chev">▾</span></div>`;
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      ${appHeader(4, 'Заявка на автокредит', undefined, 3)}
+      <div class="scard">
+        <h2 style="font-size:16px">Дополнительная информация</h2>
+        ${sel('f-edu','Образование*', S.s4.edu, 'edu', ['Высшее','Неоконченное высшее','Среднее специальное','Среднее'])}
+        ${sel('f-fam','Семейное положение*', S.s4.fam, 'fam', ['Холост / не замужем','Женат / замужем','В разводе','Вдовец / вдова'])}
+        ${sel('f-kids','Дети до 18*', S.s4.kids, 'kids', ['Нет','1','2','3 и более'])}
+      </div>
+      <div class="scard">
+        <h2 style="font-size:16px">Дополнительный контакт</h2>
+        <div class="ofield"><label>Имя*</label><input id="f-cname" value="${esc(S.s4.cname)}" onchange="S.s4.cname=this.value"></div>
+        <div class="ofield"><label>Номер телефона*</label>
+          <input id="f-cphone" inputmode="tel" value="${esc(S.s4.cphone)}" oninput="this.value=this.value?phoneMask(this.value):''" onchange="S.s4.cphone=this.value"></div>
+        ${sel('f-crel','Кем вам приходится владелец номера*', S.s4.crel, 'crel', ['Супруг / супруга','Родственник','Друг','Коллега'])}
+        <div class="link" style="font-size:13.5px; margin-top:12px">+ Добавить</div>
+      </div>
+      <div class="navrow">
+        <button class="backround" onclick="S.site='step3'; go('site-step3')">‹</button>
+        <button class="btn btn-site" onclick="step4Next()">Далее</button>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function step4Next(){
+  const bad = [];
+  if (!S.s4.edu) bad.push('f-edu');
+  if (!S.s4.fam) bad.push('f-fam');
+  if (!S.s4.kids) bad.push('f-kids');
+  if (!S.s4.cname.trim()) bad.push('f-cname');
+  if (S.s4.cphone.replace(/\D/g,'').length < 11) bad.push('f-cphone');
+  if (!S.s4.crel) bad.push('f-crel');
+  if (bad.length) return markErr(bad);
+  S.wb = 'review'; S.site = 'offers'; S.offers.ready = false;
+  setModal('preparing');
+}
+
+/* ---- Шаг 5: предложения ---- */
+function siteOffers(){
+  const o = S.offers;
+  const offerCard = (bank, name, rate) => `
+    <div class="scard" style="margin-top:10px">
+      <div class="offer-h">
+        <span class="banklogo ${bank==='otp'?'bl-otp':'bl-vtb'}">${bank==='otp'?'<span class="c"></span>':'ВТБ'}</span>
+        <span class="nm"><b>${bank==='otp'?'ОТП банк':'ВТБ'}</b><span>${name}</span></span>
+        <span class="inf">ⓘ</span>
+      </div>
+      <div class="ogrid">
+        <div class="oi"><label>Перв. взнос</label><div>1 200 000 ₽</div></div>
+        <div class="oi"><label>Ставка</label><div>${rate}</div></div>
+        <div class="oi"><label>Срок</label><div>7 лет</div></div>
+        <div class="oi"><label>Платёж в мес.</label><div>60 000 ₽</div></div>
+      </div>
+      <button class="btn btn-site" style="margin-top:14px; padding:12px" onclick="chooseBank('${bank}')">Продолжить</button>
+    </div>`;
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      ${appHeader(5, 'Предложения', undefined, 4)}
+      <div class="scard">
+        <h2>Укажите условия</h2>
+        <div class="hint">И ознакомьтесь с предложениями банков</div>
+        <div class="gfield"><label>Первоначальный взнос*</label>
+          <input inputmode="numeric" value="${fmt(o.dp)}" onchange="S.offers.dp=+this.value.replace(/\\D/g,'')||0; render()"><span class="rub">₽</span></div>
+        <input class="slider" type="range" min="200000" max="2000000" step="10000" value="${o.dp}" oninput="S.offers.dp=+this.value" onchange="render()">
+        <div class="gfield"><label>Срок кредита</label><input readonly value="${o.months} мес"></div>
+        <input class="slider" type="range" min="12" max="96" step="12" value="${o.months}" oninput="S.offers.months=+this.value" onchange="render()">
+      </div>
+      ${o.ready ? `
+        <div class="secttl">Одобрено</div>
+        ${offerCard('otp','Автокредит Лайт','18,90%')}
+        ${offerCard('vtb','АвтоВыбор (Локал)','25,40%')}
+        <div class="infoviol"><span class="i">ⓘ</span><span>Скоро здесь появится больше предложений банков-партнеров</span></div>
+      ` : `
+        <div class="secttl">Ожидаем ответ</div>
+        <div class="waitrow"><span class="banklogo bl-otp"><span class="c"></span></span> ОТП банк</div>
+        <div class="waitrow"><span class="banklogo bl-vtb">ВТБ</span> ВТБ</div>
+        <div class="infoviol"><span class="i">ⓘ</span><span>Скоро здесь появится больше предложений банков-партнеров</span></div>
+        ${demoChip('СМС — банки прислали предложения', "S.offers.ready=true; S.wb='approved'; render()")}
+        ${demoChip('все банки отказали (заказ отменится)', "S.wb='cancelled'; go('wb-orders')")}
+      `}
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function chooseBank(b){
+  S.bank = b;
+  S.docs = { d1: null, d2: null, sent: false };
+  S.dkp.signed = false; S.pv.paid = false; S.contract = { ready:false, signed:false, expired:false };
+  S.site = 'deal';
+  go('site-deal');
+}
+
+/* ============================= Шаг 6: оформление сделки ============================= */
+const BANKS = {
+  otp: { title:'ОТП Банк', prog:'Кредит «Счастливое число»', dp:'900 000 ₽', rate:'13.75%', term:'60 мес', pay:'20 824.96 ₽' },
+  vtb: { title:'ВТБ', prog:'АвтоВыбор (Локал)', dp:'1 200 000 ₽', rate:'25,40%', term:'7 лет', pay:'60 000 ₽' },
+};
+const bankCard = () => {
+  const b = BANKS[S.bank || 'otp'];
+  return `
+  <div class="scard" style="margin-top:14px">
+    <div class="offer-h">
+      <span class="banklogo ${S.bank==='vtb'?'bl-vtb':'bl-otp'}">${S.bank==='vtb'?'ВТБ':'<span class="c"></span>'}</span>
+      <span class="nm"><b>${b.title}</b><span>${b.prog}</span></span>
+    </div>
+    <div class="ogrid">
+      <div class="oi"><label>Перв.взнос</label><div>${b.dp}</div></div>
+      <div class="oi"><label>Ставка</label><div>${b.rate}</div></div>
+      <div class="oi"><label>Срок</label><div>${b.term}</div></div>
+      <div class="oi"><label>Платёж в мес.</label><div>${b.pay}</div></div>
+    </div>
+  </div>`;
+};
+
+/* блок «Что будет дальше?» — универсальный степпер */
+function whatNext(items){
+  return `
+  <div class="scard">
+    <h2>Что будет дальше?</h2>
+    <div class="stepper">
+      ${items.map(it => `
+      <div class="stp"><span class="rail"></span>
+        <span class="n ${it.done?'done':''}">${it.done?'✓':it.n}</span>
+        <div class="bd"><b>${it.t}</b>${it.p?`<p>${it.p}</p>`:''}
+          ${it.act?`<div class="act">${it.act}</div>`:''}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+const disBtn = t => `<button class="btn btn-site btn-dis">${t} <span class="spinner" style="width:13px;height:13px;border-width:2px;border-top-color:#fff;border-right-color:#fff"></span></button>`;
+
+/* ---- экран сделки: состояния docs → (vtb: dkp) → pv ---- */
+function siteDeal(){
+  const d = S.docs;
+  const stage = !d.sent ? 'docs' : (S.bank==='vtb' && !S.dkp.signed) ? 'dkp' : !S.pv.paid ? 'pv' : 'pv';
+  let body = '';
+  if (stage === 'docs') body = dealDocs();
+  else if (stage === 'dkp') body = dealDkpStage();
+  else body = dealPv();
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <div class="stepmeta">Шаг 6 из 7</div>
+      <h1 style="padding-top:2px; font-size:21px">Оформление сделки</h1>
+      <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 руб</div>
+      ${bankCard()}
+      ${body}
+      <div class="navrow"><button class="backround" onclick="dealBack()">‹</button></div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function dealBack(){
+  if (!S.docs.sent) { S.site='offers'; go('site-offers'); }
+  else render();
+}
+
+/* -- 6.1 документы -- */
+function dealDocs(){
+  const d = S.docs;
+  const fileRow = (slot) => d[slot] ? `
+    <div class="filerow"><span class="fi">📄</span>
+      <div><b>${esc(d[slot])}</b><span>100kb • Загружено</span></div>
+      <span class="del" onclick="S.docs.${slot}=null; render()">✕</span></div>` : '';
+  const drop = (slot) => `
+    <div class="docdrop" onclick="pickFile('${slot}')">or drag and drop</div>
+    <input type="file" id="file-${slot}" style="display:none" onchange="fileChosen('${slot}', this)">`;
+  const nextSteps = S.bank==='vtb' ? [
+    {n:2, t:'Внесите первоначальный взнос', p:'Ознакомьтесь с проектом договора купли-продажи и перейдите к оплате первоначального взноса',
+      act: disBtn('Оплатить первый взнос')+disBtn('Скачать ДКП')+`<span class="small dim">(Как только ссылки будут готовы, вам поступит СМС)</span>`},
+    {n:3, t:'Подпишите договор купли-продажи', p:'Ознакомьтесь с договором купли-продажи и подпишите его'},
+    {n:3, t:'Ожидаем поступление средств', p:'Продавец проверит оплату, подготовит документы и направит их в банк. Экран переключится  автоматически — дополнительные действия не требуются'},
+    {n:4, t:'Подпишите кредитный договор', p:'Как только банк проверит документы, вам будет направлен кредитный договор на подписание.<br>Мы пришлем вам СМС по готовности договора'},
+    {n:5, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля.'},
+  ] : [
+    {n:2, t:'Внесите первоначальный взнос', p:'Ознакомьтесь с проектом договора купли-продажи и перейдите к оплате первоначального взноса',
+      act: disBtn('Оплатить первый взнос')+disBtn('Скачать ДКП')+`<span class="small dim">(Как только ссылки будут готовы, вам поступит СМС)</span>`},
+    {n:3, t:'Ожидаем поступление средств', p:'Продавец проверит оплату, подготовит документы и направит их в банк. Экран переключится  автоматически — дополнительные действия не требуются'},
+    {n:4, t:'Подпишите кредитный договор', p:'Как только банк проверит документы, вам будет направлен кредитный договор на подписание.<br>Мы пришлем вам СМС по готовности договора'},
+    {n:5, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля.'},
+  ];
+  return `
+  <div class="scard">
+    <h2>1. Прикрепите документы</h2>
+    <p style="font-size:12.5px; color:#55565c; margin-top:6px; line-height:1.5">Чтобы продолжить оформление кредита, прикрепите скан или фотографию в хорошем качестве<br>
+    в формате JPG, PNG или PDF. Размер каждого файла – до 10 Мб.</p>
+    <div class="subh">${d.d1 ? 'Выберите дополнительный документ' : 'Дополнительный документ<br>удостоверяющий личность'}</div>
+    <div class="ofield"><label>Label</label>
+      <select><option>Водительское удостоверение</option><option>Загранпаспорт</option><option>СНИЛС</option></select><span class="chev">▾</span></div>
+    <div class="fhint">Прикрепите лицевую и оборотную<br>стороны документа</div>
+    ${drop('d1')}${fileRow('d1')}
+    <div class="subh">Документ, подтверждающий доход</div>
+    <div class="ofield"><label>Тип документа</label>
+      <select><option>2-НДФЛ</option><option>Справка по форме банка</option><option>Выписка ПФР</option></select><span class="chev">▾</span></div>
+    ${drop('d2')}${fileRow('d2')}
+    <div class="fhint" style="margin-top:14px">Требование банка к подтверждению дохода</div>
+    <div class="chipbtn" style="margin-top:8px; letter-spacing:.4px; font-size:12px">ИНСТРУКЦИЯ (PDF)</div>
+    <button class="btn btn-site" style="margin-top:16px" ${d.d1&&d.d2?'':'disabled'} onclick="docsSend()">Отправить</button>
+  </div>
+  ${whatNext(nextSteps)}`;
+}
+function pickFile(slot){ document.getElementById('file-'+slot).click(); }
+function fileChosen(slot, inp){
+  S.docs[slot] = inp.files[0] ? inp.files[0].name : 'IMG323341.HEIC';
+  render();
+}
+function docsSend(){ S.docs.sent = true; render(); }
+
+/* -- 6.2 ВТБ: этап ДКП -- */
+function dealDkpStage(){
+  return whatNext([
+    {done:true, t:'Документы загружены', p:'Дополнительные документы по запросу банка получены'},
+    {n:2, t:'Внесите первоначальный взнос', p:'Ознакомьтесь с проектом договора купли-продажи и перейдите к оплате первоначального взноса',
+      act: `<button class="btn btn-site" onclick="setModal('dkp-view')">Оплатить первый взнос</button>`},
+    {n:3, t:'Подпишите договор купли-продажи', p:'Ознакомьтесь с договором купли-продажи и подпишите его.',
+      act: `<button class="btn btn-site" onclick="setModal('dkp-view')">Ознакомиться с договором</button>`},
+    {n:3, t:'Ожидаем поступление средств', p:'Продавец проверит оплату, подготовит документы и направит их в банк. Экран переключится  автоматически — дополнительные действия не требуются'},
+    {n:4, t:'Подпишите кредитный договор', p:'Как только банк проверит документы, вам будет направлен кредитный договор на подписание. Мы пришлем вам СМС по готовности договора'},
+    {n:5, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля'},
+  ]);
+}
+
+/* -- 6.3 оплата ПВ -- */
+function dealPv(){
+  const vtb = S.bank === 'vtb';
+  const items = [
+    {done:true, t:'Документы загружены', p:'Дополнительные документы по запросу банка получены'},
+  ];
+  if (vtb) items.push({done:true, t:'Договор купли-продажи подписан',
+    act:`<button class="btn btn-ghost" style="padding:9px 16px" onclick="setModal('dkp-view-ro')">Скачать договор купли-продажи</button>`});
+  items.push({n:2, t:'Внесите первоначальный взнос', p: vtb ? 'Оплатите первоначальный взнос по кнопке ниже' : 'Ознакомьтесь с проектом договора купли-продажи и перейдите к оплате первоначального взноса',
+    act:`<button class="btn btn-site" onclick="setModal('pay')">Оплатить первый взнос</button>` + (vtb?'':`<button class="btn btn-site" style="background:#b06cf0" onclick="setModal('dkp-view-ro')">Скачать ДКП</button>`)});
+  if (!vtb) items.push({n:3, t:'Ожидаем поступление средств', p:'Продавец проверит оплату, подготовит документы и направит их в банк. Экран переключится  автоматически — дополнительные действия не требуются'});
+  items.push({n:vtb?3:4, t:'Подпишите кредитный договор', p:'Как только банк проверит документы, вам будет направлен кредитный договор на подписание. Мы пришлем вам СМС по готовности договора'});
+  items.push({n:vtb?4:5, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля'});
+  return whatNext(items);
+}
+
+/* ============================= Шаг 7: подписание КОД ============================= */
+/* -- ОТП: подписание в ЛК ОФМ -- */
+function siteOtpSign(){
+  if (S.contract.expired) return siteOtpExpired();
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <h1 style="padding-top:14px; font-size:22px">Подпишите документы</h1>
+      <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 ₽</div>
+      <div class="infobar"><span>ⓘ</span><span>Подпишите договор<br>до 17.11.2024 23:59 мск</span></div>
+      <div class="scard">
+        <div class="offer-h">
+          <span class="banklogo bl-otp"><span class="c"></span></span>
+          <span class="nm"><b>ОТП банк</b><span>Кредит «Счастливое число»</span></span>
+        </div>
+        <div class="ogrid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="oi"><label>Сумма кредита</label><div>2 000 000 ₽</div></div>
+          <div class="oi"><label>Платеж</label><div>50 000 ₽</div></div>
+          <div class="oi"><label>Ставка</label><div>11,90%</div></div>
+          <div class="oi"><label>ПСК</label><div>12%</div></div>
+          <div class="oi"><label>Срок</label><div>5 лет</div></div>
+        </div>
+        <div class="docrow">📄 Документы по сделке</div>
+      </div>
+      <div class="scard">
+        <h2 style="font-size:16px">Подписание</h2>
+        <div class="tglrow" style="background:#f6f6f8; border-radius:12px; padding:11px 12px; margin-top:12px">
+          <span class="tgl ${S.contract.agree!==false?'on':''}" onclick="S.contract.agree=!(S.contract.agree!==false); render()"><i></i></span>
+          <span style="margin-top:3px">С документами ознакомлен и <a class="link">согласен</a></span></div>
+        <button class="btn btn-site" style="margin-top:14px" ${S.contract.agree!==false?'':'disabled'} onclick="setModal('sms')">Подписать договор</button>
+        <div class="legal">Нажимая кнопку "Подписать договор", я подтверждаю, что полностью ознакомлен и безусловно согласен со всеми
+        условиями кредитного договора, тарифами и прочими документами по сделке, в том числе документами в отношении
+        банковского счёта (если применимо)</div>
+      </div>
+      ${demoChip('договор протух (после 21:30)', "S.contract.expired=true; render()")}
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+function siteOtpExpired(){
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <h1 style="padding-top:14px; font-size:22px">Подпишите документы</h1>
+      <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 ₽</div>
+      <div class="warnbar"><span class="wi">⚠️</span>
+        <div><b>Договор не актуален</b><span class="dim" style="font-size:12.5px">Перезапросите новый договор.</span><br>
+        <span class="lbl-btn" onclick="S.contract.expired=false; render()">ЗАПРОСИТЬ НОВЫЙ ДОГОВОР</span></div></div>
+      <div class="scard">
+        <div class="offer-h">
+          <span class="banklogo bl-otp"><span class="c"></span></span>
+          <span class="nm"><b>ОТП банк</b><span>Кредит «Счастливое число»</span></span>
+        </div>
+        <div class="ogrid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="oi"><label>Сумма кредита</label><div>2 000 000 ₽</div></div>
+          <div class="oi"><label>Платеж</label><div>50 000 ₽</div></div>
+          <div class="oi"><label>Ставка</label><div>11,90%</div></div>
+          <div class="oi"><label>ПСК</label><div>12%</div></div>
+          <div class="oi"><label>Срок</label><div>5 лет</div></div>
+        </div>
+        <div class="docrow">📄 Документы по сделке</div>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* -- ВТБ: подписание в ВТБ Онлайн (клиент банка) -- */
+function siteVtbSign(){
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <div class="stepmeta">Шаг 7 из 7</div>
+      <h1 style="padding-top:2px; font-size:21px">Подпиши договор с ВТБ</h1>
+      <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 руб</div>
+      ${bankCard()}
+      ${whatNext([
+        {done:true, t:'Документы загружены', p:'Дополнительные документы по запросу банка получены'},
+        {done:true, t:'Договор купли-продажи подписан', act:`<button class="btn btn-ghost" style="padding:9px 16px" onclick="setModal('dkp-view-ro')">Скачать договор купли-продажи</button>`},
+        {done:true, t:'Первоначальный взнос оплачен', p:'1 200 000 ₽ зачислены банку 10 августа'},
+        {done:true, t:'Кредитный договор готов', p:'Банк проверил документы<br>и сформировал договор'},
+        {n:5, t:'Подпишите договор в ВТБ Онлайн', p:'Нажмите «Подписать» — мы откроем приложение ВТБ Онлайн. Если приложение не установлено, договор откроется на странице банка в браузере. (Договор будет в разделе «Кредиты»)',
+          act:`<button class="btn btn-site" onclick="go('site-vtbo')">Подписать договор ↗</button><span class="small dim">Подписание проходит на стороне банка</span>`},
+        {n:6, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля'},
+      ])}
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* -- ВТБ: не клиент банка -- */
+function siteVtbClient(){
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <div class="stepmeta">Шаг 7 из 7</div>
+      <h1 style="padding-top:2px; font-size:21px">Стань клиентом ВТБ</h1>
+      <div class="sub" style="margin-top:2px; font-weight:600; font-size:13px; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 руб</div>
+      ${bankCard()}
+      ${whatNext([
+        {done:true, t:'Документы загружены', p:'Дополнительные документы по запросу банка получены'},
+        {done:true, t:'Договор купли-продажи подписан', act:`<button class="btn btn-ghost" style="padding:9px 16px" onclick="setModal('dkp-view-ro')">Скачать договор купли-продажи</button>`},
+        {done:true, t:'Первоначальный взнос оплачен', p:'1 200 000 ₽ зачислены 10 августа'},
+        {n:4, t:'Станьте клиентом ВТБ', p:'Подписать кредитный договор может только клиент банка. Оформите бесплатную карту ВТБ — курьер привезёт её домой или на работу, либо получите её в отделении.',
+          act:`<span class="chipbtn">Найти отделение на карте</span><span class="chipbtn">Вызвать курьера</span><span class="small dim">Обычно занимает от 1 дня</span>`},
+        {n:5, t:'Вернитесь в WB и подпишите договор', p:'Как только вы станете клиентом ВТБ, вернитесь сюда — мы откроем кредитный договор на подписание в ВТБ Онлайн.',
+          act:`<button class="btn btn-site" onclick="S.vtbClient=true; S.site='vtb-sign'; go('site-vtb-sign')">Я стал клиентом ВТБ</button>`},
+        {n:6, t:'Заберите автомобиль', p:'После подписания кредитного договора продавец свяжется для организации выдачи автомобиля'},
+      ])}
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* -- тёмный экран ВТБ Онлайн -- */
+function siteVtbo(){
+  return `
+  <div class="darkscr">
+    ${sb(true)}
+    ${pill()}
+    <div class="mid" style="flex-direction:column; gap:22px">
+      <div class="vtbo-logo">ВТБ</div>
+      <div style="text-align:center; padding:0 30px">
+        <h3 style="font-size:19px">ВТБ Онлайн</h3>
+        <p style="color:#9b9ca3; font-size:13.5px; margin-top:8px; line-height:1.5">Кредитный договор ждёт подписания<br>в разделе «Кредиты»</p>
+        <button class="btn btn-site" style="margin-top:22px" onclick="kodSigned()">Подписать КОД</button>
+      </div>
+    </div>
+    <div class="cap">
+      <h3 style="font-size:16px">Подписание КОД в ВТБ</h3>
+      <p>Клиент переходит в приложение или на сайт банка по диплинку и подписывает КОД, затем по уведомлению или смс возвращается в WB.</p>
+    </div>
+    <div class="home-ind on-dark"><i></i></div>
+  </div>`;
+}
+function kodSigned(){ S.contract.signed = true; S.wb = 'paid'; go('site-success'); }
+
+/* ============================= Успех ============================= */
+function qrSVG(){
+  // детерминированный псевдо-QR
+  let cells = '';
+  let seed = 7;
+  for (let y = 0; y < 21; y++) for (let x = 0; x < 21; x++){
+    seed = (seed * 137 + x * 31 + y * 17 + 13) % 289;
+    const corner = (x<7&&y<7)||(x>13&&y<7)||(x<7&&y>13);
+    if (corner) continue;
+    if (seed % 5 < 2) cells += `<rect x="${x*8}" y="${y*8}" width="8" height="8"/>`;
+  }
+  const eye = (cx,cy)=>`<rect x="${cx}" y="${cy}" width="56" height="56" fill="none" stroke="#111" stroke-width="10"/><rect x="${cx+18}" y="${cy+18}" width="20" height="20"/>`;
+  return `<svg viewBox="0 0 168 168" fill="#111" shape-rendering="crispEdges">${eye(5,5)}${eye(107,5)}${eye(5,107)}${cells}</svg>`;
+}
+function siteSuccess(){
+  const b = BANKS[S.bank || 'otp'];
+  return `
+  <div class="site">
+    ${siteHead()}
+    <div class="site-body" style="flex:1">
+      <h1 style="padding-top:14px">Поздравляем!<br>Банк выдал вам кредит!</h1>
+      <div class="sub" style="font-weight:600; color:#43454d">Changan UNI-S Tech 2025 за 2 184 000 руб</div>
+      <div class="scard">
+        <div class="offer-h">
+          <span class="banklogo ${S.bank==='vtb'?'bl-vtb':'bl-otp'}">${S.bank==='vtb'?'ВТБ':'<span class="c"></span>'}</span>
+          <span class="nm"><b>${b.title==='ОТП Банк'?'ОТП банк':b.title}</b><span>${b.prog}</span></span>
+        </div>
+        <div class="ogrid">
+          <div class="oi"><label>Первоначальный взнос:</label><div>${S.bank==='vtb'?'1 200 000 ₽':'1 000 000 ₽'}</div></div>
+          <div class="oi"><label>Ставка</label><div>${b.rate}</div></div>
+          <div class="oi"><label>Срок</label><div>${b.term}</div></div>
+          <div class="oi"><label>Платёж в мес.</label><div>${b.pay}</div></div>
+        </div>
+        <div class="docrow">📄 Документы по сделке</div>
+      </div>
+      <div class="scard">
+        <h2>Памятка</h2>
+        <div style="margin-top:8px">
+          <div class="memo"><span class="memo-num">1</span><div class="bd">С вами свяжется продавец<br>для организации выдачи автомобиля</div></div>
+          <div class="memo"><span class="memo-num">2</span><div class="bd"><b>Скачайте инструкцию от банка</b><br>
+            <button class="btn btn-site" style="width:auto; padding:10px 20px; font-size:13.5px; margin-top:8px">Скачать инструкцию</button></div></div>
+          <div class="memo"><span class="memo-num">3</span><div class="bd">Не забудьте оформить полис ОСАГО в течении 10 дней</div></div>
+          <div class="memo"><span class="memo-num">4</span><div class="bd">Поставьте автомобиль на учет</div></div>
+        </div>
+      </div>
+      <div class="qrblock">
+        ${qrSVG()}
+        <div class="qrcap">Сканируйте или перейдите по ссылке<br><a class="link">Ссылка на сайт банка</a></div>
+      </div>
+    </div>
+    ${siteFoot()}
+  </div>`;
+}
+
+/* ============================= Модалки ============================= */
+function modalHtml(){
+  if (!S.modal) return '';
+  const M = {
+    /* Готовим предложения (после шага 4) */
+    'preparing': () => `
+      <div class="mask" onclick="if(event.target===this){ S.modal=null; go('site-offers') }">
+        <div class="modal">
+          <div class="spinner"></div>
+          <h3>Готовим предложения</h3>
+          <p>Банки готовят предложения<br>Обычно это занимает 5 минут<br>Вы можете закрыть это окно<br>После получения предложения вам поступит СМС</p>
+          ${demoChip('СМС — предложения готовы', "S.offers.ready=true; S.wb='approved'; S.modal=null; go('site-offers')")}
+        </div>
+      </div>`,
+    /* Выбор способа оплаты ПВ */
+    'pay': () => `
+      <div class="mask bottom" onclick="if(event.target===this) setModal(null)">
+        <div class="sheet paysheet"><div class="grab"></div>
+          <b style="font-size:17px">Оплата первоначального взноса</b>
+          <div class="small dim" style="margin-top:4px">${S.bank==='vtb'?'1 200 000 ₽':'900 000 ₽'} — выберите способ</div>
+          <div class="opt" onclick="pvPaid()"><span class="ic">⚡</span> СБП</div>
+          <div class="opt" onclick="pvPaid()"><span class="ic">🧾</span> Квитанция для сканирования приложением банка</div>
+          <div class="opt" style="border-bottom:none" onclick="pvPaid()"><span class="ic">💳</span> Эквайринг дилера</div>
+        </div>
+      </div>`,
+    /* Банк готовит кредитный договор */
+    'bank-prep': () => `
+      <div class="mask" onclick="if(event.target===this) setModal(null)">
+        <div class="modal">
+          <div class="spinner"></div>
+          <h3>Банк готовит кредитный договор</h3>
+          <p>Обычно это занимает около часа<br>Вы можете закрыть это окно<br>Как только банк подготовит документы, вам поступит СМС</p>
+          ${demoChip('СМС — кредитный договор готов', "S.contract.ready=true; S.wb='sign'; S.modal=null; signEntry()")}
+        </div>
+      </div>`,
+    /* СМС-код (ОТП) */
+    'sms': () => `
+      <div class="mask bottom" onclick="if(event.target===this) setModal(null)">
+        <div class="sheet smssheet"><div class="grab"></div>
+          <div class="smic">💬</div>
+          <b style="font-size:16px">Для подтверждения договора<br>введите код из смс</b>
+          <div class="small dim" style="margin-top:6px">Который мы отправили на  +7 (999) 999 99-99</div>
+          <div class="codeboxes">
+            ${[0,1,2,3].map(i=>`<input maxlength="1" inputmode="numeric" id="code${i}" oninput="codeInput(${i}, this)">`).join('')}
+          </div>
+          <div class="small dim" style="margin-top:14px">Отправить снова можно будет через 1:13</div>
+        </div>
+      </div>`,
+    /* Ожидаем ответа от банка (ОТП после кода) */
+    'bank-wait': () => `
+      <div class="mask" onclick="if(event.target===this) setModal(null)">
+        <div class="modal">
+          <div class="spinner"></div>
+          <h3>Ожидаем ответа от банка</h3>
+          <p>Вы можете закрыть это окно<br>Как только банк подтвердит сделку вам<br>поступит СМС</p>
+          ${demoChip('СМС — банк подтвердил сделку', "S.contract.signed=true; S.wb='paid'; S.modal=null; go('site-success')")}
+        </div>
+      </div>`,
+    /* ДКП: просмотр с подписанием (ВТБ) */
+    'dkp-view': () => dkpSheet(true),
+    /* ДКП: просмотр без подписания */
+    'dkp-view-ro': () => dkpSheet(false),
+    /* Подпись (ВТБ) */
+    'signpad': () => `
+      <div class="mask bottom" onclick="if(event.target===this) setModal(null)">
+        <div class="sheet"><div class="grab"></div>
+          <b style="font-size:17px; display:block; text-align:center">Поставьте подпись</b>
+          <div class="signpad">
+            <canvas id="signcv"></canvas>
+            <div class="ph" id="signph">Распишитесь в этой области</div>
+          </div>
+          <div class="small dim" style="text-align:center; margin-top:10px">Распишитесь здесь и постарайтесь сделать подпись как<br>в паспорте.</div>
+          <div class="two-btn" style="margin-top:14px">
+            <button class="btn btn-ghost" onclick="signClear()">Стереть</button>
+            <button class="btn btn-site" id="signok" disabled onclick="dkpSigned()">Готово</button>
+          </div>
+        </div>
+      </div>`,
+    /* Вопрос: клиент ВТБ? (сервисная развилка из CJ) */
+    'vtb-question': () => `
+      <div class="mask" onclick="if(event.target===this) setModal(null)">
+        <div class="modal">
+          <div style="font-size:34px">🏦</div>
+          <h3>Пользователь — клиент ВТБ?</h3>
+          <p>Развилка из customer journey: подписать кредитный договор может только клиент банка</p>
+          <div class="two-btn" style="margin-top:16px">
+            <button class="btn btn-site" onclick="S.vtbClient=true; S.site='vtb-sign'; S.modal=null; go('site-vtb-sign')">Да</button>
+            <button class="btn btn-ghost" onclick="S.vtbClient=false; S.site='vtb-client'; S.modal=null; go('site-vtb-client')">Нет</button>
+          </div>
+        </div>
+      </div>`,
+  };
+  return (M[S.modal] || (()=>''))();
+}
+
+function dkpSheet(signable){
+  return `
+  <div class="mask bottom" onclick="if(event.target===this) setModal(null)">
+    <div class="sheet dkpsheet"><div class="grab" style="background:#c3c7cf"></div>
+      <div class="dkphead"><span>№ АВ-2184/2025</span><span class="dim">1 / 4</span></div>
+      <div class="dkpdoc">
+        <h4>ДОГОВОР КУПЛИ-ПРОДАЖИ ТРАНСПОРТНОГО СРЕДСТВА</h4>
+        <div class="no">№ АВ-2184/2025</div>
+        <b class="cl">1. ПРЕДМЕТ ДОГОВОРА</b>
+        1.1. Продавец обязуется передать в собственность Покупателя транспортное средство Changan UNI-S Tech 2025, VIN:
+        LS5A3DDE7PA012345, а Покупатель — принять и оплатить его.
+        <b class="cl">2. ЦЕНА И ПОРЯДОК РАСЧЁТОВ</b>
+        2.1. Стоимость транспортного средства составляет 2 184 000 (Два миллиона сто восемьдесят четыре тысячи) рублей.<br><br>
+        2.2. Первоначальный взнос 1 200 000 рублей вносится в течение 3 рабочих дней с момента подписания Договора.
+      </div>
+      ${signable
+        ? `<button class="btn btn-site" style="margin-top:14px" onclick="setModal('signpad'); setTimeout(initSign, 30)">Подписать</button>`
+        : `<button class="btn btn-ghost" style="margin-top:14px; background:#fff" onclick="setModal(null)">Закрыть</button>`}
+    </div>
+  </div>`;
+}
+
+/* подпись на canvas */
+let signDrawn = false;
+function initSign(){
+  const cv = document.getElementById('signcv');
+  if (!cv) return;
+  const r = cv.getBoundingClientRect();
+  cv.width = r.width * 2; cv.height = r.height * 2;
+  const ctx = cv.getContext('2d');
+  ctx.scale(2,2); ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c3550';
+  let drawing = false, px = 0, py = 0;
+  const pos = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  cv.onpointerdown = e => { drawing = true; [px,py] = pos(e); cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => {
+    if (!drawing) return;
+    const [x,y] = pos(e);
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(x,y); ctx.stroke();
+    px = x; py = y;
+    if (!signDrawn){ signDrawn = true;
+      document.getElementById('signph').style.display = 'none';
+      document.getElementById('signok').disabled = false; }
+  };
+  cv.onpointerup = () => drawing = false;
+  signDrawn = false;
+}
+function signClear(){
+  const cv = document.getElementById('signcv');
+  if (cv) cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  signDrawn = false;
+  const ph = document.getElementById('signph'); if (ph) ph.style.display = 'flex';
+  const ok = document.getElementById('signok'); if (ok) ok.disabled = true;
+}
+function dkpSigned(){ S.dkp.signed = true; setModal(null); }
+
+function pvPaid(){
+  S.pv.paid = true;
+  S.wb = 'pvdone';
+  setModal('bank-prep');
+}
+function codeInput(i, el){
+  el.value = el.value.replace(/\D/g,'');
+  if (el.value && i < 3) document.getElementById('code'+(i+1))?.focus();
+  const full = [0,1,2,3].every(k => document.getElementById('code'+k)?.value);
+  if (full) setTimeout(()=> setModal('bank-wait'), 250);
+}
+
+/* ============================= роутер ============================= */
+const ROUTES = {
+  'wb-search': wbSearch,
+  'wb-product': wbProduct,
+  'wb-credit-info': wbCreditInfo,
+  'wb-cart': wbCart,
+  'wb-orders': wbOrders,
+  'wb-details': wbDetails,
+  'site-calc': siteCalc,
+  'site-gos': siteGos,
+  'site-step1': siteStep1,
+  'site-step2': siteStep2,
+  'site-step3': siteStep3,
+  'site-step4': siteStep4,
+  'site-offers': siteOffers,
+  'site-deal': siteDeal,
+  'site-otp-sign': siteOtpSign,
+  'site-vtb-sign': siteVtbSign,
+  'site-vtb-client': siteVtbClient,
+  'site-vtbo': siteVtbo,
+  'site-success': siteSuccess,
+};
+let lastScreen = null;
+function render(){
+  const scr = document.getElementById('scr');
+  const prev = scr.scrollTop;                 // запоминаем позицию
+  const same = lastScreen === S.screen;       // остались на том же экране?
+  const fn = ROUTES[S.screen] || wbSearch;
+  scr.innerHTML = fn() + (S.screen.startsWith('site') || S.screen.startsWith('wb') ? (S.screen==='wb-orders' ? '' : modalHtml()) : '');
+  scr.scrollTop = same ? prev : 0;            // тот же экран — не прыгаем наверх
+  lastScreen = S.screen;
+}
+render();
+</script>
+</body>
+</html>

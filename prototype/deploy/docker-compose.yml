@@ -1,0 +1,12 @@
+# Запуск: docker compose up -d
+# Прототип будет на http://IP-адрес-сервера:8080
+services:
+  proto:
+    build: .
+    container_name: wb-proto
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    volumes:
+      # кадры Figma можно докладывать снаружи, без пересборки образа
+      - ./www/v2/assets:/usr/share/nginx/html/v2/assets:ro
