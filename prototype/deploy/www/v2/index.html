@@ -36,15 +36,6 @@ body.mark .hs { background:rgba(203,17,171,.28); outline:2px solid #cb11ab; }
 body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-size:9px; color:#fff;
   background:#cb11ab; padding:1px 5px; border-radius:4px; white-space:nowrap; }
 
-/* панель переходов внизу кадра — работает всегда, даже если зона промахнулась */
-.helper { position:absolute; left:0; right:0; bottom:0; z-index:50; display:flex; gap:6px;
-  padding:8px 10px calc(8px + env(safe-area-inset-bottom)); justify-content:center; flex-wrap:wrap;
-  background:linear-gradient(180deg, rgba(20,21,26,0), rgba(20,21,26,.82) 45%); }
-.helper b { background:rgba(203,17,171,.92); color:#fff; font-size:11.5px; font-weight:600;
-  border-radius:999px; padding:7px 13px; cursor:pointer; white-space:nowrap; }
-.helper b:hover { background:#cb11ab; }
-.helper.off { display:none; }
-
 /* пилюля возврата в WB */
 .backpill { position:absolute; top:10px; left:10px; z-index:60; background:#cb11ab; color:#fff;
   font-size:12px; font-weight:600; padding:6px 12px 6px 8px; border-radius:999px; cursor:pointer;
@@ -92,7 +83,6 @@ body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-s
   <span class="screenname" id="assetinfo"></span>
   <button onclick="document.getElementById('picker').click()" id="loadbtn">📁 Загрузить кадры</button>
   <button onclick="openMap()">🔗 Сопоставить</button>
-  <button onclick="toggleHelper()" id="helpbtn">⇥ Переходы</button>
   <button onclick="toggleMark()" id="markbtn">◱ Разметка (H)</button>
   <button onclick="reset()">↺ Сбросить</button>
   <input type="file" id="picker" accept="image/*" multiple style="display:none" onchange="loadFiles(this.files)">
@@ -195,14 +185,6 @@ function shortName(id){
   return t.length > 26 ? t.slice(0, 25) + '…' : t;
 }
 
-let helperOff = localStorage.getItem('wbofm.helper') === 'off';
-function toggleHelper(){
-  helperOff = !helperOff;
-  localStorage.setItem('wbofm.helper', helperOff ? 'off' : 'on');
-  document.getElementById('helpbtn').classList.toggle('on', !helperOff);
-  render();
-}
-
 let S, timer = null, drawn = false;
 function reset(){
   S = { id: F.start, bank: null, wb: null, site: 'site-calc' };
@@ -261,38 +243,23 @@ function render(){
         ${sc.draw ? `<div class="signlayer"><canvas id="sign"></canvas></div>` : ''}
       </div>
     </div>
-    ${sc.ctx === 'site' ? `<div class="backpill" onclick="toWb()">‹ Wildberries</div>` : ''}
-    <div class="helper ${helperOff ? 'off' : ''}" id="helper"></div>`;
+    ${sc.ctx === 'site' ? `<div class="backpill" onclick="toWb()">‹ Wildberries</div>` : ''}`;
 
-  // список переходов текущего экрана
-  const navItems = (sc.hotspots && sc.hotspots.length)
-    ? sc.hotspots.map(h => ({ label: shortName(resolve(h.go)), go: h.go, set: h.set }))
-    : (sc.auto ? [{ label: 'дальше', go: sc.auto.go }] : []);
+  // список переходов текущего экрана — по одному на каждый уникальный экран назначения
+  const seen = new Set();
+  const navItems = ((sc.hotspots && sc.hotspots.length)
+    ? sc.hotspots.map(h => ({ label: shortName(resolve(h.go)), go: h.go, set: h.set, key: resolve(h.go) }))
+    : (sc.auto ? [{ label: shortName(resolve(sc.auto.go)), go: sc.auto.go, key: resolve(sc.auto.go) }] : [])
+  ).filter(it => !seen.has(it.key) && seen.add(it.key));
 
   // дублирующая навигация на плейсхолдере (пока кадра нет)
   const nav = document.getElementById('phnav');
   navItems.forEach(it => {
     const b = document.createElement('b');
     b.textContent = it.label + ' →';
-    b.onclick = () => goTo(it.go, it.set);
+    b.onclick = (e) => { e.stopPropagation(); goTo(it.go, it.set); };
     nav.appendChild(b);
   });
-
-  // панель переходов поверх кадра — страховка, если зона клика промахнулась
-  const hp = document.getElementById('helper');
-  navItems.forEach(it => {
-    const b = document.createElement('b');
-    b.textContent = it.label + ' →';
-    b.onclick = e => { e.stopPropagation(); goTo(it.go, it.set); };
-    hp.appendChild(b);
-  });
-  if (sc.ctx === 'site' && S.wb) {
-    const b = document.createElement('b');
-    b.style.background = 'rgba(60,63,74,.92)';
-    b.textContent = '‹ в приложение';
-    b.onclick = e => { e.stopPropagation(); toWb(); };
-    hp.appendChild(b);
-  }
 
   const layer = document.getElementById('layer');
   (sc.hotspots || []).forEach(h => {
@@ -300,12 +267,31 @@ function render(){
     d.className = 'hs';
     d.style.cssText = `left:${h.x}%; top:${h.y}%; width:${h.w}%; height:${h.h}%;`;
     d.innerHTML = `<span class="tag">→ ${resolve(h.go)}</span>`;
-    d.onclick = () => {
+    d.onclick = (e) => {
+      e.stopPropagation();
       if (h.needDraw && !drawn) return;          // «Готово» активна только после подписи
       goTo(h.go, h.set);
     };
     layer.appendChild(d);
   });
+
+  // тап в ЛЮБОМ месте кадра ведёт дальше (как в прототипе Figma):
+  // срабатывает переход того хотспота, чья кнопка ближе всего к месту клика.
+  document.getElementById('frame').onclick = (e) => {
+    const hs = sc.hotspots || [];
+    const fr = document.getElementById('frame').getBoundingClientRect();
+    const xPct = (e.clientX - fr.left) / fr.width * 100;
+    const yPct = (e.clientY - fr.top) / fr.height * 100;
+    let pick = null, best = Infinity;
+    hs.forEach(h => {
+      if (h.needDraw && !drawn) return;
+      const dx = (h.x + h.w / 2) - xPct, dy = (h.y + h.h / 2) - yPct;
+      const d = dx * dx * 0.3 + dy * dy;        // вертикаль важнее, но лево/право различаем
+      if (d < best) { best = d; pick = h; }
+    });
+    if (pick) goTo(pick.go, pick.set);
+    else if (sc.auto) goTo(sc.auto.go);          // экраны-ожидания можно проклацать
+  };
 
   if (sc.draw) initSign();
   if (sc.auto) timer = setTimeout(() => goTo(sc.auto.go), sc.auto.delay || 2000);
@@ -388,7 +374,6 @@ document.addEventListener('drop', e => {
 
 reset();
 countAssets();
-document.getElementById('helpbtn').classList.toggle('on', !helperOff);
 </script>
 </body>
 </html>
