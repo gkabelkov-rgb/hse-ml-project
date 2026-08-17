@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Автокредит на Wildberries — ОФМ</title>
+<style>
+/* ============================================================
+   ЕДИНЫЙ ПРОТОТИП: кадры Figma 1:1 + настоящий интерактив.
+   Экран — PNG из Figma; поверх него, точно по местам полей
+   макета, лежат прозрачные инпуты, тумблеры, ползунки и т.д.
+   ============================================================ */
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; }
+body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Arial,sans-serif;
+  background:#23252b; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+
+.phone-wrap { flex:1; display:flex; align-items:stretch; justify-content:center; width:100%; }
+.phone { width:100%; max-width:430px; height:100dvh; background:#fff; overflow:hidden; position:relative;
+  display:flex; flex-direction:column; }
+@media (min-width:500px) and (min-height:700px) {
+  .phone-wrap { align-items:center; padding:18px 0; }
+  .phone { height:calc(100dvh - 36px); max-height:900px; border-radius:28px; box-shadow:0 30px 80px rgba(0,0,0,.55); }
+}
+.scroll { position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.scroll::-webkit-scrollbar { display:none; }
+.frame { position:relative; width:100%; min-height:100%; }
+.shot { width:100%; height:auto; display:block; user-select:none; -webkit-user-drag:none; }
+.layer { position:absolute; inset:0; z-index:20; }
+
+/* кликабельные зоны */
+.hs { position:absolute; cursor:pointer; border-radius:10px; }
+.hs:active { background:rgba(203,17,171,.16); }
+body.mark .hs { background:rgba(203,17,171,.25); outline:2px solid #cb11ab; }
+
+/* пилюля возврата в WB */
+.backpill { position:absolute; top:10px; left:10px; z-index:80; background:#cb11ab; color:#fff;
+  font-size:12px; font-weight:600; padding:6px 12px 6px 8px; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; gap:4px; box-shadow:0 2px 10px rgba(203,17,171,.45); animation:pin .25s ease; }
+@keyframes pin { from { transform:translateY(-16px); opacity:0; } }
+
+/* ---------- интерактивные виджеты поверх кадра ---------- */
+.wg { position:absolute; z-index:40; }
+.wcover { position:absolute; z-index:35; border-radius:10px; }
+.wg input, .wg select {
+  width:100%; height:100%; border:none; outline:none; background:transparent;
+  font-family:inherit; color:#1b1b21; font-weight:500; padding:0; appearance:none; border-radius:8px;
+}
+.wg input::placeholder { color:#9aa0ad; font-weight:400; }
+.wg.err { outline:2px solid #e0334c; outline-offset:2px; border-radius:8px; animation:shake .3s; }
+@keyframes shake { 25% { transform:translateX(-4px); } 75% { transform:translateX(4px); } }
+
+/* тумблер — как на макете */
+.wtgl { width:100%; height:100%; border-radius:999px; background:#d9dce3; position:relative; cursor:pointer; transition:background .15s; }
+.wtgl i { position:absolute; top:7%; left:4%; height:86%; aspect-ratio:1; border-radius:50%; background:#fff;
+  box-shadow:0 1px 4px rgba(0,0,0,.25); transition:left .15s; }
+.wtgl.on { background:#9a27f5; }
+.wtgl.on i { left:52%; }
+
+/* чипсы срока на калькуляторе */
+.wchips { display:flex; flex-wrap:wrap; gap:4.2% 3%; align-content:space-between; }
+.wchips b { flex:0 0 21.5%; display:flex; align-items:center; justify-content:center;
+  background:#f2f3f6; border:2px solid transparent; border-radius:999px; cursor:pointer;
+  font-weight:500; color:#1b1b21; height:44%; }
+.wchips b.on { background:#fff; border-color:#b769f2; color:#9a27f5; }
+
+/* ползунок — как на макете */
+.wslide { display:flex; align-items:center; }
+.wslide input[type=range] { -webkit-appearance:none; appearance:none; width:100%; height:100%; background:transparent; cursor:pointer; }
+.wslide input[type=range]::-webkit-slider-runnable-track { height:4px; border-radius:2px;
+  background:linear-gradient(90deg, #9a27f5 var(--p,50%), #e7e2f2 var(--p,50%)); }
+.wslide input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%;
+  background:#9a27f5; margin-top:-8px; box-shadow:0 1px 4px rgba(0,0,0,.2); }
+.wslide input[type=range]::-moz-range-track { height:4px; border-radius:2px; background:#e7e2f2; }
+.wslide input[type=range]::-moz-range-progress { height:4px; border-radius:2px; background:#9a27f5; }
+.wslide input[type=range]::-moz-range-thumb { width:20px; height:20px; border:none; border-radius:50%; background:#9a27f5; }
+
+/* вычисляемый текст (ежемесячный платёж и т.п.) */
+.wlabel { display:flex; align-items:center; font-weight:700; color:#1b1b21; }
+
+/* зона загрузки файла */
+.wfile { border-radius:12px; cursor:pointer; }
+.wfile.err { outline:2px dashed #e0334c; animation:shake .3s; }
+.wfile .done { position:absolute; inset:0; display:flex; align-items:center; gap:6px; padding:0 4%;
+  background:#f6f0ff; border-radius:12px; color:#1b1b21; font-weight:500; overflow:hidden; white-space:nowrap; }
+.wfile .done s { color:#9a27f5; text-decoration:none; }
+
+/* ячейки СМС-кода */
+.wcode input { text-align:center; font-weight:700; background:transparent; }
+
+/* подпись */
+.signlayer { position:absolute; z-index:45; }
+.signlayer canvas { width:100%; height:100%; touch-action:none; cursor:crosshair; }
+
+/* сброс */
+.resetfab { position:fixed; right:14px; bottom:14px; z-index:300; background:rgba(28,31,39,.85);
+  border:1px solid #4a4d57; color:#b9bcc7; border-radius:999px; padding:8px 14px; font-size:12px; cursor:pointer; }
+.resetfab:hover { color:#fff; border-color:#999; }
+
+/* плейсхолдер отсутствующего кадра */
+.ph { position:absolute; inset:0; z-index:30; background:#f2f3f6; color:#33343c; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px; padding:34px 26px; text-align:center; }
+.ph h3 { font-size:16px; }
+.ph p { font-size:12.5px; color:#6d7380; line-height:1.5; }
+.ph b.next { background:#a232e8; color:#fff; border-radius:999px; padding:9px 18px; font-size:13px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="phone-wrap"><div class="phone"><div class="scroll" id="scroll"><div class="frame" id="frame"></div></div>
+<div id="pill"></div></div></div>
+<button class="resetfab" onclick="resetAll()" title="Начать сначала">↺</button>
+
+<script>
+"use strict";
+/* ============================== ЭКРАНЫ И ПЕРЕХОДЫ ============================== */
+const A = '../assets/';
+const FLOW = [
+  /* -------- WB app -------- */
+  { id:'wb-search', file:'wb-01-poisk.png', ctx:'wb',
+    hs:[ {x:2,y:47,w:47,h:14,go:'wb-product'}, {x:51,y:47,w:47,h:14,go:'wb-product'} ] },
+  { id:'wb-product', file:'wb-02-kartochka.png', ctx:'wb',
+    hs:[ {x:2,y:45.8,w:40,h:2,go:'wb-credit-promo'},
+         {x:2,y:71,w:96,h:4,go:'wb-credit-promo'},
+         {x:1.5,y:78.2,w:42,h:3.6,go:'wb-credit-promo'},
+         {x:46,y:78.2,w:40,h:3.6,go:'wb-cart'} ] },
+  { id:'wb-credit-promo', file:'wb-03-promo-kredit.png', ctx:'wb',
+    hs:[ {x:4,y:94,w:92,h:4,go:'site-calc'} ] },
+  { id:'wb-cart', file:'wb-04-korzina.png', ctx:'wb',
+    hs:[ {x:4,y:93,w:92,h:5,go:'wb-orders-created'} ] },
+
+  /* -------- сайт ОФМ: заявка -------- */
+  { id:'site-calc', file:'site-01-kalkulyator.png', ctx:'site',
+    hs:[ {x:4,y:59,w:92,h:5.4,go:'site-gos'} ] },
+  { id:'site-gos', file:'site-02-gosuslugi.png', ctx:'site', auto:{go:'site-step1', delay:2200} },
+  { id:'site-step1', file:'site-03-shag1-usloviya.png', ctx:'site',
+    hs:[ {x:3,y:48.6,w:94,h:2.9,go:'site-step2', check:'s1'} ] },
+  { id:'site-step2', file:'site-04-shag2-kontakty.png', ctx:'site',
+    hs:[ {x:21,y:91,w:76,h:5.5,go:'site-step3', check:'s2'}, {x:2.5,y:91,w:13,h:5.5,go:'site-step1'} ] },
+  { id:'site-step3', file:'site-05-shag3-rabota.png', ctx:'site',
+    hs:[ {x:21,y:92.6,w:76,h:5.2,go:'site-step4', check:'s3'}, {x:2.5,y:92.6,w:13,h:5.2,go:'site-step2'} ] },
+  { id:'site-step4', file:'site-06-shag4-dop-info.png', ctx:'site',
+    hs:[ {x:21,y:92.3,w:76,h:5.2,go:'site-preparing', check:'s4'}, {x:2.5,y:92.3,w:13,h:5.2,go:'site-step3'} ] },
+
+  /* -------- подбор офера -------- */
+  { id:'site-preparing', file:'site-07-gotovim-predlozheniya.png', ctx:'site', wb:'review', auto:{go:'site-offers-wait', delay:2600} },
+  { id:'site-offers-wait', file:'site-08-predlozheniya-ozhidanie.png', ctx:'site', wb:'review', auto:{go:'site-offers', delay:3200} },
+  { id:'site-offers', file:'site-09-predlozheniya-odobreno.png', ctx:'site', wb:'approved',
+    hs:[ {x:7,y:59.5,w:86,h:3.5,go:'otp-docs', set:{bank:'otp'}},
+         {x:7,y:84.2,w:86,h:3.5,go:'vtb-docs', set:{bank:'vtb'}} ] },
+
+  /* -------- ОТП -------- */
+  { id:'otp-docs', file:'otp-01-dop-dokumenty.png', ctx:'site', wb:'approved',
+    hs:[ {x:7.5,y:55.2,w:85,h:2.7,go:'otp-docs-filled', check:'docs'} ] },
+  { id:'otp-docs-filled', file:'otp-02-dokumenty-zagruzheny.png', ctx:'site', wb:'approved',
+    hs:[ {x:7.5,y:61.5,w:85,h:2.7,go:'otp-pv'} ] },
+  { id:'otp-pv', file:'otp-03-oplata-pv.png', ctx:'site', wb:'pv',
+    hs:[ {x:8,y:46,w:50,h:4,go:'site-bank-prep'} ] },
+  { id:'otp-sign', file:'otp-04-podpishite-dokumenty.png', ctx:'site', wb:'sign',
+    hs:[ {x:7.4,y:65,w:85.2,h:5,go:'otp-sms', check:'agree'} ] },
+  { id:'otp-sms', file:'otp-05-sms-kod.png', ctx:'site', wb:'sign' },
+  { id:'otp-wait', file:'otp-06-ozhidaem-otvet-banka.png', ctx:'site', wb:'sign', auto:{go:'site-success', delay:3000} },
+
+  /* -------- ВТБ -------- */
+  { id:'vtb-docs', file:'vtb-01-dop-dokumenty.png', ctx:'site', wb:'approved',
+    hs:[ {x:7.5,y:55.2,w:85,h:2.7,go:'vtb-docs-filled', check:'docs'} ] },
+  { id:'vtb-docs-filled', file:'vtb-02-dokumenty-zagruzheny.png', ctx:'site', wb:'approved',
+    hs:[ {x:7.5,y:61.5,w:85,h:2.7,go:'vtb-dkp'} ] },
+  { id:'vtb-dkp', file:'vtb-03-podpisanie-dkp.png', ctx:'site', wb:'pv',
+    hs:[ {x:8,y:60,w:60,h:4,go:'vtb-dkp-doc'} ] },
+  { id:'vtb-dkp-doc', file:'vtb-04-dkp-dokument.png', ctx:'site', wb:'pv',
+    hs:[ {x:6,y:92,w:88,h:5,go:'vtb-sign-dkp'} ] },
+  { id:'vtb-sign-dkp', file:'vtb-05-postavte-podpis.png', ctx:'site', wb:'pv', draw:true,
+    hs:[ {x:51,y:92.5,w:45,h:5.3,go:'vtb-pv', check:'drawn'},
+         {x:4.5,y:92.5,w:44,h:5.3,go:'vtb-sign-dkp'} ] },
+  { id:'vtb-pv', file:'vtb-06-oplata-pv.png', ctx:'site', wb:'pv',
+    hs:[ {x:8,y:53,w:50,h:4,go:'site-bank-prep'} ] },
+  { id:'vtb-client', file:'vtb-08-stan-klientom-vtb.png', ctx:'site', wb:'sign',
+    hs:[ {x:8,y:83,w:50,h:4,go:'vtb-sign'} ] },
+  { id:'vtb-sign', file:'vtb-07-podpishi-dogovor-vtb.png', ctx:'site', wb:'sign',
+    hs:[ {x:8,y:80,w:50,h:4,go:'vtb-online'} ] },
+  { id:'vtb-online', file:'vtb-09-vtb-onlain.png', ctx:'site', wb:'sign',
+    hs:[ {x:10,y:60,w:80,h:8,go:'site-success'} ] },
+
+  /* -------- общее -------- */
+  { id:'site-bank-prep', file:'site-10-bank-gotovit-dogovor.png', ctx:'site', wb:'pvdone', auto:{go:'@sign', delay:3200} },
+  { id:'site-success', file:'site-11-ekran-uspeha.png', ctx:'site', wb:'paid' },
+
+  /* -------- WB: статусы заявки -------- */
+  { id:'wb-orders-created', file:'wb-05-zakaz-sozdan.png', ctx:'wb', status:'created',
+    hs:[ {x:6,y:36,w:88,h:4,go:'@resume'} ] },
+  { id:'wb-orders-review', file:'wb-08-zayavku-rassmatrivayut.png', ctx:'wb', status:'review',
+    hs:[ {x:6,y:33,w:60,h:2.5,go:'@resume'} ], auto:{go:'wb-orders-approved', delay:4200} },
+  { id:'wb-orders-approved', file:'wb-10-zayavka-odobrena.png', ctx:'wb', status:'approved',
+    hs:[ {x:6,y:40,w:88,h:4,go:'site-offers'} ] },
+  { id:'wb-orders-cancelled', file:'wb-12-zakaz-otmenen.png', ctx:'wb', status:'cancelled' },
+  { id:'wb-orders-pv', file:'wb-14-vnesite-pv.png', ctx:'wb', status:'pv',
+    hs:[ {x:6,y:38,w:88,h:4,go:'@pv'} ] },
+  { id:'wb-orders-pvdone', file:'wb-15-pv-vnesen.png', ctx:'wb', status:'pvdone',
+    hs:[ {x:6,y:35,w:60,h:2.5,go:'site-bank-prep'} ] },
+  { id:'wb-orders-sign', file:'wb-16-podpishite-dogovor.png', ctx:'wb', status:'sign',
+    hs:[ {x:6,y:44,w:88,h:4,go:'@sign'} ] },
+  { id:'wb-orders-paid', file:'wb-17-zakaz-oplachen.png', ctx:'wb', status:'paid',
+    hs:[ {x:6,y:60,w:88,h:5,go:'wb-details-paid'} ] },
+  { id:'wb-details-paid', file:'wb-18-detali-zakaza.png', ctx:'wb', status:'paid' },
+];
+const byId = id => FLOW.find(s => s.id === id);
+
+/* ============================== СОСТОЯНИЕ ============================== */
+const S0 = () => ({
+  screen:'wb-search', bank:null, wb:null, site:'site-calc',
+  v: {   // значения полей
+    calcDp:1000000, calcYears:8,
+    dp:200000, months:84, c1:true, c2:true, c3:true,
+    phone:'', email:'', sameAddr:false,
+    emp:'', sphere:'', org:'', wphone:'', waddr:'', wdate:'', pos:'', income:'', extra:false,
+    edu:'', fam:'', kids:'', cname:'', cphone:'', crel:'',
+    offDp:1200000, offMonths:84,
+    agree:true, code:'',
+  },
+  docs:{ d1:false, d2:false },
+});
+let S = S0();
+try {
+  const saved = JSON.parse(localStorage.getItem('wbofm.app') || 'null');
+  if (saved && saved.screen && byId(saved.screen)) S = Object.assign(S0(), saved, { v: Object.assign(S0().v, saved.v || {}) });
+} catch(e){}
+function persist(){ try { localStorage.setItem('wbofm.app', JSON.stringify(S)); } catch(e){} }
+function resetAll(){ S = S0(); localStorage.removeItem('wbofm.app'); history.replaceState(null,'',location.pathname); render(); }
+
+const fmt = n => Math.round(n).toLocaleString('ru-RU');
+const annuity = (p, m, apr) => { const r = apr/12/100; return p*r/(1-Math.pow(1+r,-m)); };
+let drawn = false, timer = null;
+
+/* ============================== НАВИГАЦИЯ ============================== */
+function resolve(t){
+  if (t === '@sign')   return S.bank === 'vtb' ? 'vtb-client' : 'otp-sign';
+  if (t === '@pv')     return S.bank === 'vtb' ? 'vtb-pv' : 'otp-pv';
+  if (t === '@resume') return S.site || 'site-calc';
+  return t;
+}
+function goTo(t, set){
+  if (set) Object.assign(S, set);
+  const id = resolve(t);
+  const sc = byId(id);
+  if (!sc) return;
+  S.screen = id;
+  drawn = false;
+  if (sc.ctx === 'site') S.site = id;
+  if (sc.wb) S.wb = sc.wb;
+  if (sc.status) S.wb = sc.status;
+  render();
+  if ('#'+id !== location.hash) history.pushState(null,'','#'+id);
+}
+window.addEventListener('popstate', () => {
+  const id = location.hash.slice(1);
+  if (id && byId(id) && id !== S.screen) { S.screen = id; drawn = false; render(); }
+});
+function toWb(){
+  const t = FLOW.find(s => s.ctx === 'wb' && s.status === S.wb);
+  goTo(t ? t.id : 'wb-orders-created');
+}
+
+/* ============================== ПРОВЕРКИ ============================== */
+const digits = s => (s||'').replace(/\D/g,'');
+const CHECKS = {
+  s1: () => S.v.c1 && S.v.c2 && S.v.c3 ? [] : ['t-c1','t-c2','t-c3'].filter((id,i)=>![S.v.c1,S.v.c2,S.v.c3][i]),
+  s2: () => {
+    const bad = [];
+    if (digits(S.v.phone).length < 11) bad.push('w-phone');
+    if (!/.+@.+\..+/.test(S.v.email)) bad.push('w-email');
+    return bad;
+  },
+  s3: () => {
+    const bad = [];
+    if (!S.v.sphere) bad.push('w-sphere');
+    if (!S.v.org) bad.push('w-org');
+    if (!S.v.income.trim()) bad.push('w-income');
+    return bad;
+  },
+  s4: () => {
+    const bad = [];
+    if (!S.v.edu) bad.push('w-edu');
+    if (!S.v.fam) bad.push('w-fam');
+    if (!S.v.kids) bad.push('w-kids');
+    if (!S.v.cname.trim()) bad.push('w-cname');
+    if (digits(S.v.cphone).length < 11) bad.push('w-cphone');
+    if (!S.v.crel) bad.push('w-crel');
+    return bad;
+  },
+  docs: () => { const bad=[]; if(!S.docs.d1) bad.push('w-f1'); if(!S.docs.d2) bad.push('w-f2'); return bad; },
+  agree: () => S.v.agree ? [] : ['t-agree'],
+  drawn: () => drawn ? [] : ['sig'],
+};
+function phoneMask(v){
+  const d = digits(v).replace(/^[78]/,'').slice(0,10);
+  let out = '+7';
+  if (d.length) out += ' (' + d.slice(0,3);
+  if (d.length >= 3) out += ') ' + d.slice(3,6);
+  if (d.length >= 6) out += '-' + d.slice(6,8);
+  if (d.length >= 8) out += '-' + d.slice(8,10);
+  return d.length ? out : '';
+}
+
+/* ============================== ВИДЖЕТЫ ============================== */
+/* координаты — в % от кадра; шрифты — в долях ширины кадра */
+const F_VAL = .0405, F_BIG = .0430;
+function W(id){
+  const v = S.v;
+  const map = {
+  'site-calc': [
+    { t:'input', id:'w-cdp', x:10.8,y:29.5,w:70,h:2.6, cover:{x:9.8,y:29.1,w:74,h:3.5,bg:'#F2F3F6'}, font:F_BIG, money:true, rub:true,
+      get:()=>v.calcDp, set:x=>{ v.calcDp = Math.min(4500000, +digits(x)||0); } },
+    { t:'chips', x:7.5,y:35.9,w:85,h:9.6, font:.036,
+      items:['8 лет','7 лет','6 лет','5 лет','4 года','3 года','2 года','1 год'],
+      get:()=>8-v.calcYears, set:i=>{ v.calcYears = 8-i; } },
+    { t:'label', x:14.5,y:50.7,w:55,h:2.2, cover:{x:14,y:50.4,w:60,h:2.9,bg:'#F2F3F6'}, font:F_BIG,
+      get:()=>'от '+fmt(annuity(5000000-v.calcDp, v.calcYears*12, 22.9))+' ₽' },
+  ],
+  'site-step1': [
+    { t:'input', id:'w-dp', x:10,y:18.5,w:65,h:1.9, cover:{x:9.6,y:18.25,w:70,h:2.4,bg:'#F2F3F6'}, font:F_VAL, money:true,
+      get:()=>v.dp, set:x=>{ v.dp = Math.min(2000000, +digits(x)||0); } },
+    { t:'slider', x:7.5,y:20.75,w:85,h:1.5, cover:{x:7,y:20.6,w:86,h:1.9,bg:'#fff'}, min:100000, max:2000000, step:10000,
+      get:()=>v.dp, set:x=>{ v.dp = +x; } },
+    { t:'label', x:10,y:23.9,w:50,h:1.9, cover:{x:9.6,y:23.65,w:60,h:2.4,bg:'#F2F3F6'}, font:F_VAL, weight:500,
+      get:()=>v.months+' мес' },
+    { t:'slider', x:7.5,y:26.05,w:85,h:1.5, cover:{x:7,y:25.9,w:86,h:1.9,bg:'#fff'}, min:12, max:96, step:12,
+      get:()=>v.months, set:x=>{ v.months = +x; } },
+    { t:'label', x:7.5,y:27.75,w:50,h:1.7, cover:{x:7.2,y:27.55,w:55,h:2.1,bg:'#fff'}, font:F_VAL,
+      get:()=>'от '+fmt(annuity(2184000-v.dp, v.months, 25.2))+' ₽' },
+    { t:'toggle', id:'t-c1', x:2.9,y:39.35,w:11.2,h:1.28, key:'c1' },
+    { t:'toggle', id:'t-c2', x:2.9,y:43.25,w:11.2,h:1.28, key:'c2' },
+    { t:'toggle', id:'t-c3', x:2.9,y:46.15,w:11.2,h:1.28, key:'c3' },
+  ],
+  'site-step2': [
+    { t:'input', id:'w-phone', x:10,y:39,w:79,h:2.5, cover:{x:9.4,y:38.6,w:80.5,h:3.2,bg:'#F2F3F6'}, font:F_VAL,
+      placeholder:'+7 (999) 999-99-99', mask:phoneMask, get:()=>v.phone, set:x=>{ v.phone = x; } },
+    { t:'input', id:'w-email', x:10,y:46.2,w:79,h:2.5, cover:{x:9.4,y:45.8,w:80.5,h:3.2,bg:'#F2F3F6'}, font:F_VAL,
+      placeholder:'example@gmail.com', get:()=>v.email, set:x=>{ v.email = x; } },
+    { t:'toggle', x:7.2,y:74.7,w:9,h:2.15, key:'sameAddr' },
+    ...(v.sameAddr ? [{ t:'cover', x:7,y:79.2,w:86.5,h:6.4, bg:'#fff' }] : []),
+  ],
+  'site-step3': [
+    { t:'select', id:'w-emp', x:9.5,y:34.4,w:80,h:2.6, valcover:{x:9,y:34,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'emp',
+      opts:['Полная занятость','Частичная занятость','Самозанятый','ИП','Пенсионер','Не работаю'] },
+    { t:'select', id:'w-sphere', x:9.5,y:40.6,w:80,h:2.6, valcover:{x:9,y:40.2,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'sphere',
+      opts:['Информационные технологии','Торговля','Производство','Финансы','Госслужба','Другое'] },
+    { t:'select', id:'w-org', x:9.5,y:46.8,w:80,h:2.6, valcover:{x:9,y:46.4,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'org',
+      opts:['ПАО СБЕРБАНК','АО «Открытый финансовый маркетплейс»','ООО «Вайлдберриз»','Другая организация'] },
+    { t:'input', x:10,y:52.4,w:79,h:2.6, focuscover:{x:9.4,y:52,w:80.5,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      mask:phoneMask, get:()=>v.wphone, set:x=>{ v.wphone = x; } },
+    { t:'input', x:10,y:58.6,w:79,h:2.6, focuscover:{x:9.4,y:58.2,w:80.5,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      get:()=>v.waddr, set:x=>{ v.waddr = x; } },
+    { t:'input', x:10,y:64.9,w:70,h:2.6, focuscover:{x:9.4,y:64.5,w:72,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      placeholder:'дд.мм.гггг', get:()=>v.wdate, set:x=>{ v.wdate = x; } },
+    { t:'select', x:9.5,y:71.2,w:80,h:2.6, valcover:{x:9,y:70.8,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'pos',
+      opts:['Разработчик','Менеджер','Аналитик','Руководитель','Специалист','Другое'] },
+    { t:'input', id:'w-income', x:10,y:80.6,w:79,h:2.6, focuscover:{x:9.4,y:80.2,w:80.5,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      money:true, get:()=>v.income, set:x=>{ v.income = digits(x) ? fmt(+digits(x)) : ''; } },
+    { t:'toggle', x:7.4,y:86.6,w:8.6,h:2.1, key:'extra' },
+  ],
+  'site-step4': [
+    { t:'select', id:'w-edu', x:9.5,y:35.1,w:80,h:2.6, valcover:{x:9,y:34.7,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'edu',
+      opts:['Высшее','Неоконченное высшее','Среднее специальное','Среднее'] },
+    { t:'select', id:'w-fam', x:9.5,y:41.5,w:80,h:2.6, valcover:{x:9,y:41.1,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'fam',
+      opts:['Холост / не замужем','Женат / замужем','В разводе','Вдовец / вдова'] },
+    { t:'select', id:'w-kids', x:9.5,y:47.9,w:80,h:2.6, valcover:{x:9,y:47.5,w:75,h:3.4,bg:'#F2F3F6'}, font:F_VAL, key:'kids',
+      opts:['Нет','1','2','3 и более'] },
+    { t:'input', id:'w-cname', x:10,y:63.6,w:79,h:2.6, focuscover:{x:9.4,y:63.2,w:80.5,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      get:()=>v.cname, set:x=>{ v.cname = x; } },
+    { t:'input', id:'w-cphone', x:10,y:70,w:79,h:2.6, focuscover:{x:9.4,y:69.6,w:80.5,h:3.4,bg:'#F2F3F6'}, font:F_VAL,
+      mask:phoneMask, get:()=>v.cphone, set:x=>{ v.cphone = x; } },
+    { t:'select', id:'w-crel', x:9.5,y:76.2,w:80,h:2.9, valcover:{x:9,y:74.4,w:78,h:6.4,bg:'#F2F3F6'}, font:F_VAL, key:'crel',
+      opts:['Супруг / супруга','Родственник','Друг','Коллега'] },
+  ],
+  'site-offers': [
+    { t:'input', x:10.8,y:24.9,w:60,h:2.2, cover:{x:10.2,y:24.6,w:65,h:2.8,bg:'#F2F3F6'}, font:F_VAL, money:true,
+      get:()=>v.offDp, set:x=>{ v.offDp = Math.min(2000000, +digits(x)||0); } },
+    { t:'slider', x:9.5,y:27.1,w:81,h:1.4, cover:{x:9,y:26.9,w:82.5,h:1.8,bg:'#F2F3F6'}, min:200000, max:2000000, step:10000,
+      get:()=>v.offDp, set:x=>{ v.offDp = +x; } },
+    { t:'label', x:10.8,y:31.4,w:50,h:2, cover:{x:10.2,y:31.1,w:55,h:2.6,bg:'#F2F3F6'}, font:F_VAL, weight:500,
+      get:()=>v.offMonths+' мес' },
+    { t:'slider', x:9.5,y:33.9,w:81,h:1.4, cover:{x:9,y:33.7,w:82.5,h:1.8,bg:'#F2F3F6'}, min:12, max:96, step:12,
+      get:()=>v.offMonths, set:x=>{ v.offMonths = +x; } },
+  ],
+  'otp-sign': [ { t:'toggle', id:'t-agree', x:22,y:59.85,w:16.8,h:2.1, key:'agree' } ],
+  'otp-sms': [ { t:'code', x:29,y:89.2,w:42,h:3, font:.05 } ],
+  };
+  map['otp-docs'] = map['vtb-docs'] = [
+    { t:'select', x:9.5,y:31.4,w:80,h:2.2, valcover:{x:8.5,y:30.4,w:78,h:3.6,bg:'#fff'}, font:F_VAL, key:'doctype',
+      opts:['Водительское удостоверение','Загранпаспорт','СНИЛС'] },
+    { t:'file', id:'w-f1', x:7,y:35.4,w:86,h:4.2, slot:'d1' },
+    { t:'file', id:'w-f2', x:7,y:46.5,w:86,h:4, slot:'d2' },
+  ];
+  return map[id] || [];
+}
+
+/* ============================== ОТРИСОВКА ============================== */
+function render(){
+  clearTimeout(timer);
+  const sc = byId(S.screen);
+  const fr = document.getElementById('frame');
+  const scroll = document.getElementById('scroll');
+  persist();
+
+  fr.innerHTML = `
+    <img class="shot" src="${A}${sc.file}" alt=""
+         onerror="this.style.display='none'; document.getElementById('phold').style.display='flex'">
+    <div class="ph" id="phold" style="display:none">
+      <h3>Экран «${sc.id}»</h3>
+      <p>Кадр <b>${sc.file}</b> ещё не выгружен из Figma.<br>Путь можно продолжить:</p>
+      ${(sc.hs||[]).length ? `<b class="next" id="phnext">Дальше →</b>` : ''}
+    </div>
+    <div class="layer" id="layer"></div>`;
+  document.getElementById('pill').innerHTML =
+    sc.ctx === 'site' ? `<div class="backpill" onclick="toWb()">‹ Wildberries</div>` : '';
+
+  const layer = document.getElementById('layer');
+  const phnext = document.getElementById('phnext');
+  if (phnext) phnext.onclick = () => { const h = sc.hs[0]; goTo(h.go, h.set); };
+
+  /* --- кликабельные зоны --- */
+  (sc.hs || []).forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'hs';
+    d.style.cssText = `left:${h.x}%; top:${h.y}%; width:${h.w}%; height:${h.h}%;`;
+    d.onclick = (e) => {
+      e.stopPropagation();
+      if (h.check){
+        const bad = CHECKS[h.check]();
+        if (bad.length){ bad.forEach(id => { const el = document.getElementById(id); if (el){ el.classList.add('err'); setTimeout(()=>el.classList.remove('err'), 1600); } }); return; }
+      }
+      goTo(h.go, h.set);
+    };
+    layer.appendChild(d);
+  });
+
+  /* --- интерактивные виджеты --- */
+  W(S.screen).forEach(w => addWidget(layer, w));
+
+  /* --- подпись --- */
+  if (sc.draw){
+    const sl = document.createElement('div');
+    sl.className = 'signlayer';
+    sl.id = 'sig';
+    sl.style.cssText = 'left:5%; top:33.6%; width:90%; height:51%;';
+    sl.innerHTML = '<canvas id="signcv"></canvas>';
+    fr.appendChild(sl);
+    requestAnimationFrame(initSign);
+  }
+
+  /* --- масштаб шрифтов относительно кадра --- */
+  const setScale = () => fr.style.setProperty('--fw', fr.clientWidth + 'px');
+  setScale();
+  new ResizeObserver(setScale).observe(fr);
+
+  if (sc.auto) timer = setTimeout(() => goTo(sc.auto.go), sc.auto.delay || 2500);
+  scroll.scrollTop = 0;
+}
+
+function addWidget(layer, w){
+  const fs = f => `font-size:calc(var(--fw) * ${f || F_VAL})`;
+  const cover = (c) => {
+    if (!c) return null;
+    const d = document.createElement('div');
+    d.className = 'wcover';
+    d.style.cssText = `left:${c.x}%; top:${c.y}%; width:${c.w}%; height:${c.h}%; background:${c.bg};`;
+    layer.appendChild(d);
+    return d;
+  };
+  const box = (extra='') => {
+    const d = document.createElement('div');
+    d.className = 'wg';
+    if (w.id) d.id = w.id;
+    d.style.cssText = `left:${w.x}%; top:${w.y}%; width:${w.w}%; height:${w.h}%; ${extra}`;
+    layer.appendChild(d);
+    return d;
+  };
+
+  if (w.t === 'cover'){ cover({x:w.x,y:w.y,w:w.w,h:w.h,bg:w.bg}); return; }
+
+  if (w.t === 'input'){
+    cover(w.cover);
+    const fc = w.focuscover ? cover(w.focuscover) : null;
+    if (fc) fc.style.display = (w.get()+'').length ? '' : 'none';
+    const d = box();
+    const inp = document.createElement('input');
+    inp.style.cssText = fs(w.font) + '; font-weight:' + (w.weight || 600);
+    if (w.placeholder) inp.placeholder = w.placeholder;
+    const moneyText = () => { const d = digits(''+w.get()); return d ? fmt(+d) + (w.rub ? ' ₽' : '') : ''; };
+    inp.value = w.money ? moneyText() : (w.get() ?? '');
+    inp.oninput = () => {
+      if (w.mask) inp.value = w.mask(inp.value);
+      if (w.money){ const dgt = digits(inp.value); inp.value = dgt ? fmt(+dgt) : ''; }
+      w.set(inp.value);
+      if (fc) fc.style.display = inp.value.length || document.activeElement === inp ? '' : 'none';
+      syncDynamic();
+      persist();
+    };
+    inp.onfocus = () => { if (fc) fc.style.display = '';
+      if (w.money && w.rub) inp.value = inp.value.replace(' ₽',''); };
+    inp.onblur = () => { if (fc && !inp.value.length) fc.style.display = 'none'; if (w.money && w.set) render(); };
+    inp.onclick = e => e.stopPropagation();
+    d.appendChild(inp);
+    return;
+  }
+
+  if (w.t === 'label'){
+    cover(w.cover);
+    const d = box();
+    d.className += ' wlabel';
+    d.dataset.dyn = '1';
+    d.style.cssText += fs(w.font) + '; font-weight:' + (w.weight || 700);
+    d.textContent = w.get();
+    d.dataset.key = FLOW.indexOf(byId(S.screen)) + '_' + w.y;
+    d._get = w.get;
+    return;
+  }
+
+  if (w.t === 'toggle'){
+    const d = box();
+    const t = document.createElement('div');
+    t.className = 'wtgl' + (S.v[w.key] ? ' on' : '');
+    t.innerHTML = '<i></i>';
+    t.onclick = (e) => { e.stopPropagation(); S.v[w.key] = !S.v[w.key]; persist(); render(); };
+    d.appendChild(t);
+    return;
+  }
+
+  if (w.t === 'chips'){
+    const d = box();
+    d.className += ' wchips';
+    d.style.cssText += fs(w.font);
+    w.items.forEach((label, i) => {
+      const b = document.createElement('b');
+      b.textContent = label;
+      if (w.get() === i) b.className = 'on';
+      b.onclick = (e) => { e.stopPropagation(); w.set(i); persist(); render(); };
+      d.appendChild(b);
+    });
+    // спрятать нарисованные чипсы кадра (подпись «Срок» выше — не трогаем)
+    cover({x:w.x-1, y:w.y-.15, w:w.w+2, h:w.h+.9, bg:'#fff'});
+    layer.appendChild(d); // поверх cover
+    return;
+  }
+
+  if (w.t === 'slider'){
+    cover(w.cover);
+    const d = box();
+    d.className += ' wslide';
+    const r = document.createElement('input');
+    r.type = 'range'; r.min = w.min; r.max = w.max; r.step = w.step; r.value = w.get();
+    const setP = () => r.style.setProperty('--p', ((r.value - w.min) / (w.max - w.min) * 100) + '%');
+    setP();
+    r.oninput = () => { w.set(r.value); setP(); syncDynamic(); persist(); };
+    r.onchange = () => render();
+    r.onclick = e => e.stopPropagation();
+    d.appendChild(r);
+    return;
+  }
+
+  if (w.t === 'select'){
+    const vc = w.valcover ? cover(w.valcover) : null;
+    if (vc) vc.style.display = S.v[w.key] ? '' : 'none';
+    const d = box();
+    const sel = document.createElement('select');
+    sel.style.cssText = fs(w.font) + '; font-weight:500; cursor:pointer;';
+    sel.innerHTML = '<option value="" hidden></option>' + w.opts.map(o => `<option ${o===S.v[w.key]?'selected':''}>${o}</option>`).join('');
+    sel.onchange = () => { S.v[w.key] = sel.value; persist(); render(); };
+    sel.onclick = e => e.stopPropagation();
+    d.appendChild(sel);
+    return;
+  }
+
+  if (w.t === 'file'){
+    const d = box();
+    d.className += ' wfile';
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*,.pdf'; inp.style.display = 'none';
+    const drawState = () => {
+      d.querySelector('.done')?.remove();
+      if (S.docs[w.slot]){
+        const ok = document.createElement('div');
+        ok.className = 'done';
+        ok.style.fontSize = 'calc(var(--fw) * .034)';
+        ok.innerHTML = `<s>📄</s> ${S.docs[w.slot] === true ? 'IMG323341.HEIC' : S.docs[w.slot]} · загружено`;
+        d.appendChild(ok);
+      }
+    };
+    inp.onchange = () => {
+      S.docs[w.slot] = inp.files[0] ? inp.files[0].name : true;
+      persist(); drawState();
+      if (S.docs.d1 && S.docs.d2) setTimeout(() => goTo(S.bank === 'vtb' ? 'vtb-docs-filled' : 'otp-docs-filled'), 350);
+    };
+    d.onclick = (e) => { e.stopPropagation(); inp.click(); };
+    d.appendChild(inp);
+    drawState();
+    return;
+  }
+
+  if (w.t === 'code'){
+    const d = box();
+    d.className += ' wcode';
+    d.style.cssText += 'display:flex; gap:6%;';
+    for (let i = 0; i < 4; i++){
+      const c = document.createElement('input');
+      c.maxLength = 1; c.inputMode = 'numeric';
+      c.style.cssText = `flex:1; ${fs(w.font)};`;
+      c.oninput = () => {
+        c.value = c.value.replace(/\D/g,'');
+        if (c.value && c.nextElementSibling) c.nextElementSibling.focus();
+        const all = [...d.querySelectorAll('input')].every(x => x.value);
+        if (all) setTimeout(() => goTo('otp-wait'), 300);
+      };
+      c.onclick = e => e.stopPropagation();
+      d.appendChild(c);
+    }
+    return;
+  }
+}
+
+/* пересчёт вычисляемых подписей без полной перерисовки (чтобы не терять фокус) */
+function syncDynamic(){
+  document.querySelectorAll('.wlabel[data-dyn]').forEach(el => { if (el._get) el.textContent = el._get(); });
+}
+
+/* ============================== ПОДПИСЬ ============================== */
+function initSign(){
+  const cv = document.getElementById('signcv');
+  if (!cv) return;
+  const r = cv.getBoundingClientRect();
+  cv.width = r.width * 2; cv.height = r.height * 2;
+  const ctx = cv.getContext('2d');
+  ctx.scale(2,2); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c3550';
+  let down = false, px = 0, py = 0;
+  const pos = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  cv.onpointerdown = e => { down = true; [px,py] = pos(e); cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => {
+    if (!down) return;
+    const [x,y] = pos(e);
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(x,y); ctx.stroke();
+    px = x; py = y; drawn = true;
+  };
+  cv.onpointerup = () => down = false;
+  cv.onclick = e => e.stopPropagation();
+}
+
+/* ============================== СТАРТ ============================== */
+/* режим разметки для отладки зон: клавиша H */
+document.addEventListener('keydown', e => { if (e.key === 'h' || e.key === 'H' || e.key === 'р') document.body.classList.toggle('mark'); });
+const startHash = location.hash.slice(1);
+if (startHash && byId(startHash)) S.screen = startHash;
+render();
+</script>
+</body>
+</html>
