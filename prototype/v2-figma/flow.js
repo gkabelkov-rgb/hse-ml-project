@@ -34,7 +34,7 @@ window.FLOW = {
 
     { id:'wb-cart', file:'wb-04-korzina.png', ctx:'wb',
       title:'WB · Корзина',
-      hotspots:[ {x:4,y:93,w:92,h:5,go:'wb-orders-created'} ] },
+      hotspots:[ {x:3,y:88.6,w:94,h:6.2,go:'wb-orders-created'} ] },
 
     /* ---------------- Сайт ОФМ: заявка ---------------- */
     { id:'site-calc', file:'site-01-kalkulyator.png', ctx:'site',
