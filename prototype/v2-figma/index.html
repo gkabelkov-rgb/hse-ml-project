@@ -53,6 +53,22 @@ body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-s
 .ph .nav b { background:#a232e8; color:#fff; border-radius:999px; padding:7px 14px; font-size:12px; cursor:pointer; font-weight:600; }
 
 .hint { color:#6d7380; font-size:11.5px; text-align:center; padding-bottom:8px; }
+
+/* панель сопоставления кадров */
+.maps { position:fixed; inset:0; background:rgba(15,16,20,.75); z-index:200; display:flex;
+  align-items:center; justify-content:center; padding:26px; }
+.mapbox { background:#1c1f27; border-radius:16px; width:min(880px,100%); max-height:86vh; display:flex; flex-direction:column; }
+.maphead { display:flex; align-items:center; gap:12px; padding:14px 18px; border-bottom:1px solid #2c2f38; }
+.maphead .sp { flex:1; }
+.maphead button { background:#a232e8; border:none; color:#fff; border-radius:999px; padding:7px 18px; font-size:13px; cursor:pointer; }
+.maplist { overflow-y:auto; padding:8px 18px 18px; }
+.maprow { display:flex; align-items:center; gap:12px; padding:9px 0; border-bottom:1px solid #23262f; }
+.maprow .th { width:36px; height:64px; border-radius:6px; background:#2a2d36; object-fit:cover; object-position:top; flex:0 0 36px; }
+.maprow .nm { flex:1; font-size:13px; }
+.maprow .nm small { display:block; color:#7d8291; font-size:11px; margin-top:2px; }
+.maprow select { background:#2a2d36; color:#e8eaf0; border:1px solid #3a3e49; border-radius:8px;
+  padding:7px 10px; font-size:12.5px; font-family:inherit; max-width:290px; }
+.maprow.ok .nm { color:#57d08b; }
 </style>
 </head>
 <body>
@@ -60,8 +76,22 @@ body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-s
   <b>WB × ОФМ</b> <span class="screenname" id="nm">—</span>
   <span class="sp"></span>
   <span class="screenname" id="assetinfo"></span>
+  <button onclick="document.getElementById('picker').click()" id="loadbtn">📁 Загрузить кадры</button>
+  <button onclick="openMap()">🔗 Сопоставить</button>
   <button onclick="toggleMark()" id="markbtn">◱ Разметка (H)</button>
   <button onclick="reset()">↺ Сбросить</button>
+  <input type="file" id="picker" accept="image/*" multiple style="display:none" onchange="loadFiles(this.files)">
+</div>
+<div class="maps" id="maps" style="display:none">
+  <div class="mapbox">
+    <div class="maphead">
+      <b>Сопоставление кадров</b>
+      <span class="sp"></span>
+      <span class="screenname" id="mapinfo"></span>
+      <button onclick="closeMap()">Готово</button>
+    </div>
+    <div class="maplist" id="maplist"></div>
+  </div>
 </div>
 <div class="stage">
   <div class="phone" id="phone"></div>
@@ -73,6 +103,74 @@ body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-s
 "use strict";
 const F = window.FLOW;
 const byId = id => F.screens.find(s => s.id === id);
+
+/* ---------- загруженные кадры: screenId → dataURL ---------- */
+let IMG = {};        // назначенные кадры
+let POOL = {};       // все загруженные файлы: имя → dataURL
+try {
+  IMG  = JSON.parse(localStorage.getItem('wbofm.img')  || '{}');
+  POOL = JSON.parse(localStorage.getItem('wbofm.pool') || '{}');
+} catch (e) { IMG = {}; POOL = {}; }
+function saveImgs(){
+  try {
+    localStorage.setItem('wbofm.img', JSON.stringify(IMG));
+    localStorage.setItem('wbofm.pool', JSON.stringify(POOL));
+  } catch (e) { /* переполнение хранилища — кадры живут до перезагрузки */ }
+}
+
+const norm = s => (s || '').toLowerCase().replace(/\.(png|jpe?g|webp)$/,'').replace(/[^a-zа-я0-9]+/gi,'');
+
+/* загрузка выбранных файлов + автосопоставление по имени */
+function loadFiles(files){
+  const list = [...files];
+  if (!list.length) return;
+  let done = 0, matched = 0;
+  list.forEach(f => {
+    const rd = new FileReader();
+    rd.onload = () => {
+      POOL[f.name] = rd.result;
+      // точное или близкое совпадение с ожидаемым именем экрана
+      const hit = F.screens.find(s => norm(s.file) === norm(f.name))
+               || F.screens.find(s => !IMG[s.id] && norm(f.name).includes(norm(s.file).slice(0, 12)));
+      if (hit && !IMG[hit.id]) { IMG[hit.id] = rd.result; matched++; }
+      if (++done === list.length) {
+        saveImgs(); render(); countAssets();
+        if (matched < list.length) openMap();   // остальные назначим вручную
+      }
+    };
+    rd.readAsDataURL(f);
+  });
+}
+
+/* панель сопоставления: каждому экрану — выпадающий список загруженных файлов */
+function openMap(){
+  const box = document.getElementById('maplist');
+  const names = Object.keys(POOL);
+  document.getElementById('mapinfo').textContent =
+    names.length ? `загружено файлов: ${names.length}` : 'файлы ещё не загружены';
+  box.innerHTML = '';
+  F.screens.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'maprow' + (IMG[s.id] ? ' ok' : '');
+    row.innerHTML = `
+      ${IMG[s.id] ? `<img class="th" src="${IMG[s.id]}">` : `<div class="th"></div>`}
+      <div class="nm">${s.title || s.id}<small>${s.file}</small></div>`;
+    const sel = document.createElement('select');
+    sel.innerHTML = `<option value="">— не назначен —</option>` +
+      names.map(n => `<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');
+    // отметить текущий выбор
+    const cur = names.find(n => POOL[n] === IMG[s.id]);
+    if (cur) sel.value = cur;
+    sel.onchange = () => {
+      if (sel.value) IMG[s.id] = POOL[sel.value]; else delete IMG[s.id];
+      saveImgs(); openMap(); render(); countAssets();
+    };
+    row.appendChild(sel);
+    box.appendChild(row);
+  });
+  document.getElementById('maps').style.display = 'flex';
+}
+function closeMap(){ document.getElementById('maps').style.display = 'none'; }
 
 let S, timer = null, drawn = false;
 function reset(){
@@ -114,15 +212,16 @@ function render(){
   const ph = document.getElementById('phone');
   document.getElementById('nm').textContent = sc.title || sc.id;
 
+  const src = IMG[sc.id] || ('assets/' + sc.file);
   ph.innerHTML = `
-    <img class="shot" src="assets/${sc.file}" alt=""
+    <img class="shot" src="${src}" alt=""
          onerror="this.style.display='none'; document.getElementById('phold').style.display='flex'">
     <div class="ph" id="phold" style="display:none">
       <div class="ic">🖼</div>
       <h3>${sc.title || sc.id}</h3>
-      <p>Положите кадр из Figma в файл</p>
-      <code>prototype/v2-figma/assets/${sc.file}</code>
-      <p>Переходы уже настроены — как только файл появится,<br>экран отрисуется кадром 1:1.</p>
+      <p>Нажмите <b>«📁 Загрузить кадры»</b> вверху и выберите<br>PNG-экспорты из Figma — или положите файл сюда:</p>
+      <code>assets/${sc.file}</code>
+      <p>Переходы уже настроены — как только кадр появится,<br>экран отрисуется 1:1.</p>
       <div class="nav" id="phnav"></div>
     </div>
     <div class="layer" id="layer"></div>
@@ -156,14 +255,14 @@ function render(){
 
   if (sc.draw) initSign();
   if (sc.auto) timer = setTimeout(() => goTo(sc.auto.go), sc.auto.delay || 2000);
-  checkAsset(sc.file);
 }
 
-/* индикатор: сколько кадров уже на месте */
-async function checkAsset(){
+/* индикатор: сколько кадров уже на месте (загруженные + лежащие в assets/) */
+async function countAssets(){
   const total = F.screens.length;
   let ok = 0;
   await Promise.all(F.screens.map(s => new Promise(res => {
+    if (IMG[s.id]) { ok++; return res(); }
     const im = new Image();
     im.onload = () => { ok++; res(); };
     im.onerror = res;
@@ -222,7 +321,15 @@ document.addEventListener('keydown', e => { if (e.key === 'h' || e.key === 'H' |
   });
 })();
 
+/* перетаскивание файлов прямо на окно */
+document.addEventListener('dragover', e => { e.preventDefault(); });
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer?.files?.length) loadFiles(e.dataTransfer.files);
+});
+
 reset();
+countAssets();
 </script>
 </body>
 </html>
