@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WB × ОФМ — автокредит (кадры Figma)</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; }
+body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#23252b; color:#e8eaf0; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+.topbar { width:100%; display:flex; align-items:center; gap:14px; padding:10px 18px; font-size:13px; color:#b9bcc7; flex-wrap:wrap; }
+.topbar b { color:#fff; }
+.topbar .sp { flex:1; }
+.topbar button { background:none; border:1px solid #4a4d57; color:#b9bcc7; border-radius:999px; padding:5px 13px; font-size:12px; cursor:pointer; }
+.topbar button:hover, .topbar button.on { color:#fff; border-color:#cb11ab; }
+.screenname { color:#8d93a1; font-size:12px; }
+
+.stage { flex:1; display:flex; align-items:center; justify-content:center; padding:6px 0 18px; }
+.phone { position:relative; height:min(852px, calc(100vh - 76px)); aspect-ratio:393/852;
+  background:#fff; border-radius:44px; border:10px solid #17181c; overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.55); }
+.shot { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:top center; display:block; }
+.layer { position:absolute; inset:0; z-index:20; }
+
+/* кликабельные зоны поверх кадра */
+.hs { position:absolute; cursor:pointer; border-radius:8px; }
+.hs:active { background:rgba(203,17,171,.22); }
+body.mark .hs { background:rgba(203,17,171,.28); outline:2px solid #cb11ab; }
+.hs .tag { display:none; }
+body.mark .hs .tag { display:block; position:absolute; top:-16px; left:0; font-size:9px; color:#fff;
+  background:#cb11ab; padding:1px 5px; border-radius:4px; white-space:nowrap; }
+
+/* пилюля возврата в WB */
+.backpill { position:absolute; top:10px; left:10px; z-index:60; background:#cb11ab; color:#fff;
+  font-size:12px; font-weight:600; padding:6px 12px 6px 8px; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; gap:4px; box-shadow:0 2px 10px rgba(203,17,171,.45); animation:pin .25s ease; }
+@keyframes pin { from { transform:translateY(-16px); opacity:0; } }
+
+/* подпись на кадре */
+.signlayer { position:absolute; inset:0; z-index:30; }
+.signlayer canvas { position:absolute; left:6%; top:34%; width:88%; height:34%; touch-action:none; cursor:crosshair; }
+
+/* плейсхолдер, когда кадра ещё нет */
+.ph { position:absolute; inset:0; z-index:40; background:#f2f3f6; color:#33343c; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:12px; padding:34px 26px; text-align:center; }
+.ph .ic { font-size:40px; }
+.ph h3 { font-size:16px; }
+.ph code { background:#fff; border:1px solid #dfe1e7; border-radius:8px; padding:6px 10px;
+  font-size:12.5px; color:#a232e8; display:inline-block; word-break:break-all; }
+.ph p { font-size:12.5px; color:#6d7380; line-height:1.5; }
+.ph .nav { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+.ph .nav b { background:#a232e8; color:#fff; border-radius:999px; padding:7px 14px; font-size:12px; cursor:pointer; font-weight:600; }
+
+.hint { color:#6d7380; font-size:11.5px; text-align:center; padding-bottom:8px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <b>WB × ОФМ</b> <span class="screenname" id="nm">—</span>
+  <span class="sp"></span>
+  <span class="screenname" id="assetinfo"></span>
+  <button onclick="toggleMark()" id="markbtn">◱ Разметка (H)</button>
+  <button onclick="reset()">↺ Сбросить</button>
+</div>
+<div class="stage">
+  <div class="phone" id="phone"></div>
+</div>
+<div class="hint">Клик по кнопке на кадре — переход дальше. Пилюля «‹ Wildberries» слева сверху — возврат в приложение.</div>
+
+<script src="flow.js"></script>
+<script>
+"use strict";
+const F = window.FLOW;
+const byId = id => F.screens.find(s => s.id === id);
+
+let S, timer = null, drawn = false;
+function reset(){
+  S = { id: F.start, bank: null, wb: null, site: 'site-calc' };
+  drawn = false;
+  render();
+}
+
+/* переходы со спец-целями */
+function resolve(target){
+  if (target === '@sign')   return S.bank === 'vtb' ? 'vtb-sign' : 'otp-sign';
+  if (target === '@pv')     return S.bank === 'vtb' ? 'vtb-pv'   : 'otp-pv';
+  if (target === '@resume') return S.site || 'site-calc';
+  return target;
+}
+function goTo(target, set){
+  if (set) Object.assign(S, set);
+  const id = resolve(target);
+  if (!byId(id)) { console.warn('нет экрана', id); return; }
+  S.id = id;
+  drawn = false;
+  const sc = byId(id);
+  if (sc.ctx === 'site') S.site = id;            // куда возвращать из приложения
+  if (sc.wbStatus) S.wb = sc.wbStatus;           // статус заявки в WB
+  if (sc.status) S.wb = sc.status;
+  render();
+}
+
+/* возврат в приложение WB — на экран, соответствующий текущему статусу */
+function toWb(){
+  const st = S.wb;
+  const target = F.screens.find(s => s.ctx === 'wb' && s.status === st);
+  goTo(target ? target.id : 'wb-orders-created');
+}
+
+function render(){
+  clearTimeout(timer);
+  const sc = byId(S.id);
+  const ph = document.getElementById('phone');
+  document.getElementById('nm').textContent = sc.title || sc.id;
+
+  ph.innerHTML = `
+    <img class="shot" src="assets/${sc.file}" alt=""
+         onerror="this.style.display='none'; document.getElementById('phold').style.display='flex'">
+    <div class="ph" id="phold" style="display:none">
+      <div class="ic">🖼</div>
+      <h3>${sc.title || sc.id}</h3>
+      <p>Положите кадр из Figma в файл</p>
+      <code>prototype/v2-figma/assets/${sc.file}</code>
+      <p>Переходы уже настроены — как только файл появится,<br>экран отрисуется кадром 1:1.</p>
+      <div class="nav" id="phnav"></div>
+    </div>
+    <div class="layer" id="layer"></div>
+    ${sc.ctx === 'site' ? `<div class="backpill" onclick="toWb()">‹ Wildberries</div>` : ''}
+    ${sc.draw ? `<div class="signlayer"><canvas id="sign"></canvas></div>` : ''}`;
+
+  // дублирующая навигация на плейсхолдере (пока кадра нет) — обработчики, без inline-JSON
+  const nav = document.getElementById('phnav');
+  const navItems = (sc.hotspots && sc.hotspots.length)
+    ? sc.hotspots.map(h => ({ label: resolve(h.go), go: h.go, set: h.set }))
+    : (sc.auto ? [{ label: 'дальше', go: sc.auto.go }] : []);
+  navItems.forEach(it => {
+    const b = document.createElement('b');
+    b.textContent = it.label + ' →';
+    b.onclick = () => goTo(it.go, it.set);
+    nav.appendChild(b);
+  });
+
+  const layer = document.getElementById('layer');
+  (sc.hotspots || []).forEach(h => {
+    const d = document.createElement('div');
+    d.className = 'hs';
+    d.style.cssText = `left:${h.x}%; top:${h.y}%; width:${h.w}%; height:${h.h}%;`;
+    d.innerHTML = `<span class="tag">→ ${resolve(h.go)}</span>`;
+    d.onclick = () => {
+      if (h.needDraw && !drawn) return;          // «Готово» активна только после подписи
+      goTo(h.go, h.set);
+    };
+    layer.appendChild(d);
+  });
+
+  if (sc.draw) initSign();
+  if (sc.auto) timer = setTimeout(() => goTo(sc.auto.go), sc.auto.delay || 2000);
+  checkAsset(sc.file);
+}
+
+/* индикатор: сколько кадров уже на месте */
+async function checkAsset(){
+  const total = F.screens.length;
+  let ok = 0;
+  await Promise.all(F.screens.map(s => new Promise(res => {
+    const im = new Image();
+    im.onload = () => { ok++; res(); };
+    im.onerror = res;
+    im.src = 'assets/' + s.file;
+  })));
+  document.getElementById('assetinfo').textContent = `кадров: ${ok} из ${total}`;
+}
+
+/* рисование подписи прямо поверх кадра */
+function initSign(){
+  const cv = document.getElementById('sign');
+  if (!cv) return;
+  const r = cv.getBoundingClientRect();
+  cv.width = r.width * 2; cv.height = r.height * 2;
+  const ctx = cv.getContext('2d');
+  ctx.scale(2, 2); ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.strokeStyle = '#2c3550';
+  let down = false, px = 0, py = 0;
+  const pos = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  cv.onpointerdown = e => { down = true; [px, py] = pos(e); cv.setPointerCapture(e.pointerId); };
+  cv.onpointermove = e => {
+    if (!down) return;
+    const [x, y] = pos(e);
+    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+    px = x; py = y; drawn = true;
+  };
+  cv.onpointerup = () => down = false;
+}
+
+/* режим разметки: подсветка зон + снятие координат мышью */
+function toggleMark(){
+  document.body.classList.toggle('mark');
+  document.getElementById('markbtn').classList.toggle('on', document.body.classList.contains('mark'));
+}
+document.addEventListener('keydown', e => { if (e.key === 'h' || e.key === 'H' || e.key === 'р') toggleMark(); });
+
+/* Alt + протяжка по кадру → координаты зоны в консоль и в буфер */
+(function measure(){
+  let start = null;
+  document.addEventListener('pointerdown', e => {
+    if (!e.altKey) return;
+    const ph = document.getElementById('phone').getBoundingClientRect();
+    start = { x: (e.clientX - ph.left) / ph.width * 100, y: (e.clientY - ph.top) / ph.height * 100, ph };
+  });
+  document.addEventListener('pointerup', e => {
+    if (!start) return;
+    const { ph } = start;
+    const x2 = (e.clientX - ph.left) / ph.width * 100, y2 = (e.clientY - ph.top) / ph.height * 100;
+    const o = {
+      x: +Math.min(start.x, x2).toFixed(1), y: +Math.min(start.y, y2).toFixed(1),
+      w: +Math.abs(x2 - start.x).toFixed(1), h: +Math.abs(y2 - start.y).toFixed(1),
+    };
+    const txt = `{x:${o.x},y:${o.y},w:${o.w},h:${o.h},go:'…'}`;
+    console.log(S.id, txt);
+    navigator.clipboard?.writeText(txt);
+    start = null;
+  });
+})();
+
+reset();
+</script>
+</body>
+</html>
