@@ -61,14 +61,14 @@ svg{display:block}
 /* ============================== ТЕЛЕФОН ============================== */
 .phone-zone{display:flex; justify-content:center}
 .phone{width:393px; max-width:100%; height:832px; background:#14121A; border-radius:52px; padding:10px; box-shadow:0 24px 60px rgba(20,10,40,.35); position:relative; flex:none}
-.phone-inner{position:relative; width:100%; height:100%; border-radius:42px; overflow:hidden; background:#F5F4F9; display:flex; flex-direction:column}
+.phone-inner{position:relative; width:100%; height:100%; border-radius:42px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column}
 
-/* WB-токены экрана (телефон всегда в светлой теме приложения WB — осознанно) */
+/* WB-токены экрана — тёмная тема приложения */
 .phone-inner{
-  --bg:#F5F4F9; --card:#FFFFFF; --ink:#211E2E; --ink2:#8C8A99; --ink3:#B7B4C4;
-  --brand:#CB11AB; --brand-grad:linear-gradient(100deg,#CB11AB 0%,#9A1FE8 55%,#7C1AF5 100%);
-  --violet:#7C1AF5; --lav:#F0EAFB; --lav2:#E7DEF8; --star:#FF9E00; --green:#22A053; --red:#F03A5F;
-  --line:#ECEAF2; --chip:#F1EFF6;
+  --bg:#131118; --card:#1F1C27; --ink:#F0EEF6; --ink2:#9B96AA; --ink3:#565064;
+  --brand:#E135C6; --brand-grad:linear-gradient(100deg,#CB11AB 0%,#9A1FE8 55%,#7C1AF5 100%);
+  --violet:#A78BFA; --lav:#2C2440; --lav2:#3A3153; --star:#FF9E00; --green:#4ADE80; --red:#FF5C7A;
+  --line:#2B2836; --chip:#282430;
   color:var(--ink); font-size:14px;
 }
 .statusbar{flex:none; height:34px; display:flex; align-items:center; justify-content:space-between; padding:8px 26px 0; font-size:13px; font-weight:700; background:var(--card); z-index:30; position:relative}
@@ -90,7 +90,7 @@ svg{display:block}
 
 /* Кнопка-оверлей FE-08 */
 .cta-overlay{position:absolute; left:0; right:0; bottom:0; padding:10px 14px 20px; z-index:25;
-  background:linear-gradient(180deg, rgba(245,244,249,0) 0%, rgba(245,244,249,.9) 38%, #F5F4F9 100%); pointer-events:none}
+  background:linear-gradient(180deg, rgba(19,17,24,0) 0%, rgba(19,17,24,.9) 38%, #131118 100%); pointer-events:none}
 .cta-overlay .cta{pointer-events:auto; width:100%; height:52px; border-radius:15px; background:var(--brand-grad); color:#fff; font-size:16px; font-weight:800; letter-spacing:.1px; box-shadow:0 8px 22px rgba(160,20,200,.35); display:flex; align-items:center; justify-content:center; gap:8px}
 .cta-overlay .cta:active{transform:translateY(1px)}
 .cta-overlay .cta:disabled{opacity:.5; box-shadow:none; cursor:default}
@@ -117,6 +117,9 @@ svg{display:block}
 
 /* Полки FE-04 */
 .shelf{margin-top:8px}
+.shelf.accent{background:linear-gradient(140deg,#4C1D95 0%,#7C1AF5 140%); border-radius:20px; margin:12px 8px 4px; padding:2px 0 12px}
+.shelf.accent .sh-t, .shelf.accent .sh-sub{color:#fff}
+.shelf.accent .more{color:#EBD9FF}
 .shelf-head{display:flex; align-items:baseline; padding:8px 14px 8px; gap:8px}
 .shelf-head .sh-t{font-size:17px; font-weight:800; letter-spacing:-.2px}
 .shelf-head .sh-sub{display:block; font-size:12px; color:var(--ink2); font-weight:500; margin-top:2px}
@@ -144,9 +147,9 @@ svg{display:block}
 .badges{display:flex; flex-wrap:wrap; gap:4px; margin-top:2px}
 .badge{font-size:9.6px; font-weight:700; border-radius:6px; padding:2.5px 6px; line-height:1.1}
 .badge.credit{background:var(--lav); color:var(--violet)}
-.badge.gos{background:#E3F5EA; color:var(--green)}
-.badge.excl{background:#FCE9F7; color:var(--brand)}
-.badge.wbcheck{background:#E7F0FB; color:#2563EB}
+.badge.gos{background:#14301F; color:var(--green)}
+.badge.excl{background:#3A1030; color:#F284DC}
+.badge.wbcheck{background:#12263F; color:#60A5FA}
 .deliv{margin-top:6px; background:var(--lav); color:var(--violet); font-size:11px; font-weight:700; border-radius:9px; padding:6px 8px; text-align:center}
 
 /* Тизеры — низкие широкие скроллящиеся плашки (референс «сделано дома») FE-06 */
@@ -161,8 +164,8 @@ svg{display:block}
 /* Коллекция отраслевых подборок — квадратные тайлы с подписью под ними */
 .coll{display:flex; gap:8px; overflow-x:auto; padding:2px 14px 4px; scrollbar-width:none}
 .coll::-webkit-scrollbar{display:none}
-.coll-item{flex:none; width:96px; text-align:center}
-.coll-tile{width:100%; height:58px; border-radius:16px; background:linear-gradient(165deg,#F1EFF6,#E6E2EF); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden}
+.coll-item{flex:0 0 calc((100% - 16px)/3); min-width:0; text-align:center}
+.coll-tile{width:100%; height:58px; border-radius:16px; background:linear-gradient(165deg,#262130,#332B45); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden}
 .coll-tile svg.cc-art{width:64%; max-width:86px; filter:drop-shadow(0 4px 5px rgba(80,30,160,.25))}
 .coll-tile .cc-ic{display:flex; align-items:center; justify-content:center; color:#7C3AED; filter:drop-shadow(0 3px 4px rgba(80,30,160,.22))}
 .coll-tile .cc-badge{position:absolute; top:5px; right:5px; width:19px; height:19px; border-radius:50%; background:var(--brand-grad); color:#fff; display:flex; align-items:center; justify-content:center}
@@ -178,8 +181,8 @@ svg{display:block}
 .chipsrow::-webkit-scrollbar{display:none}
 .chip{flex:none; display:flex; align-items:center; gap:6px; background:var(--lav); color:var(--violet); border-radius:99px; padding:7px 8px 7px 12px; font-size:12.5px; font-weight:700}
 .chip .x{width:16px; height:16px; border-radius:50%; background:rgba(124,26,245,.14); display:flex; align-items:center; justify-content:center; color:var(--violet)}
-.chip.query{background:#FCE9F7; color:var(--brand)}
-.chip.query .x{background:rgba(203,17,171,.13); color:var(--brand)}
+.chip.query{background:#3A1030; color:#F284DC}
+.chip.query .x{background:rgba(226,53,198,.2); color:#F284DC}
 .toolrow{display:flex; align-items:center; gap:14px; padding:8px 14px; background:var(--card); border-bottom:1px solid var(--line)}
 .toolrow .tool{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--ink)}
 .toolrow .cnt-label{margin-left:auto; font-size:12px; color:var(--ink2); font-weight:500}
@@ -245,7 +248,7 @@ svg{display:block}
 .cardbox{background:var(--card); border-radius:20px; padding:16px 14px; position:relative}
 .tabs{display:flex; gap:6px; background:var(--chip); padding:4px; border-radius:13px; margin-bottom:12px}
 .tab{flex:1; height:34px; border-radius:10px; font-size:11.5px; font-weight:700; color:var(--ink2); display:flex; align-items:center; justify-content:center; white-space:nowrap; transition:all .12s}
-.tab.on{background:var(--card); color:var(--ink); box-shadow:0 2px 6px rgba(30,20,60,.12)}
+.tab.on{background:var(--lav2); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.3)}
 .fld .note{display:block; font-size:10.5px; color:var(--ink2); margin-top:4px; line-height:1.4}
 .fld .fmsg{display:none; font-size:11px; color:var(--red); margin-top:4px; line-height:1.4}
 .fld.showerr .fmsg{display:block}
@@ -253,12 +256,12 @@ svg{display:block}
 .plate-ok{position:absolute; right:12px; top:38px; color:var(--green); display:none}
 .fld.valid .plate-ok{display:block}
 .agree > span{flex:1; min-width:0}
-.form-alert{display:none; background:#FDECEF; color:#B4233F; border-radius:12px; padding:10px 12px; font-size:12px; line-height:1.45; margin-bottom:10px}
+.form-alert{display:none; background:#3A1220; color:#FF8AA0; border-radius:12px; padding:10px 12px; font-size:12px; line-height:1.45; margin-bottom:10px}
 .form-alert.show{display:block}
 .spinner{width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; animation:tispin .7s linear infinite}
 @keyframes tispin{to{transform:rotate(360deg)}}
 .result{text-align:center; padding:6px 4px}
-.result .r-badge{display:inline-flex; align-items:center; gap:6px; background:#E3F5EA; color:var(--green); border-radius:99px; padding:5px 12px; font-size:11.5px; font-weight:700}
+.result .r-badge{display:inline-flex; align-items:center; gap:6px; background:#14301F; color:var(--green); border-radius:99px; padding:5px 12px; font-size:11.5px; font-weight:700}
 .result .r-sum{font-size:21.5px; font-weight:800; letter-spacing:-.4px; margin-top:12px; color:var(--ink); white-space:nowrap; font-variant-numeric:tabular-nums}
 .result .r-car{font-size:13px; color:var(--ink2); margin-top:6px}
 .result .r-note{font-size:11.5px; color:var(--ink2); margin-top:10px; line-height:1.5; padding:0 10px}
@@ -296,7 +299,7 @@ svg{display:block}
 .sheet .sh-head .lnk{color:var(--brand); font-size:13px; font-weight:700; flex:none}
 .sheet .sh-body{flex:1; overflow-y:auto; padding:0 14px; scrollbar-width:none}
 .sheet .sh-body::-webkit-scrollbar{display:none}
-.sheet .sh-foot{flex:none; padding:10px 14px calc(14px + env(safe-area-inset-bottom,6px)); background:linear-gradient(180deg,rgba(245,244,249,0),var(--bg) 40%)}
+.sheet .sh-foot{flex:none; padding:10px 14px calc(14px + env(safe-area-inset-bottom,6px)); background:linear-gradient(180deg,rgba(19,17,24,0),var(--bg) 40%)}
 .btn-primary{width:100%; height:50px; border-radius:14px; background:var(--brand-grad); color:#fff; font-size:15.5px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:8px}
 .btn-primary:disabled{opacity:.55}
 .btn-ghost{width:100%; height:46px; border-radius:13px; background:var(--chip); color:var(--ink); font-size:14px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:8px}
@@ -307,7 +310,7 @@ svg{display:block}
 .fgroup > b{display:block; font-size:14px; font-weight:800; margin-bottom:10px}
 .fchips{display:flex; flex-wrap:wrap; gap:6px}
 .fchip{border:1.5px solid var(--line); background:var(--card); border-radius:99px; padding:7px 13px; font-size:12.5px; font-weight:600; color:var(--ink); transition:all .12s}
-.fchip.on{border-color:var(--brand); color:var(--brand); background:#FCE9F7}
+.fchip.on{border-color:var(--brand); color:#F284DC; background:#3A1030}
 .fchip:disabled{opacity:.4; cursor:default}
 .frange{display:flex; gap:8px}
 .frange label{flex:1; display:flex; align-items:center; background:var(--card); border:1.5px solid var(--line); border-radius:12px; padding:0 12px; height:44px; gap:6px; font-size:12px; color:var(--ink2)}
@@ -346,7 +349,7 @@ svg{display:block}
 .agree{display:flex; gap:9px; font-size:11.5px; color:var(--ink2); line-height:1.45; margin:4px 0 6px; align-items:flex-start}
 .agree input{margin-top:2px; accent-color:var(--brand)}
 .success{padding:26px 18px 10px; text-align:center}
-.success .s-ic{width:74px; height:74px; margin:0 auto; border-radius:50%; background:#E3F5EA; color:var(--green); display:flex; align-items:center; justify-content:center}
+.success .s-ic{width:74px; height:74px; margin:0 auto; border-radius:50%; background:#14301F; color:var(--green); display:flex; align-items:center; justify-content:center}
 .success h3{font-size:19px; font-weight:800; margin-top:16px; letter-spacing:-.2px}
 .success p{font-size:13px; color:var(--ink2); margin-top:8px; line-height:1.5}
 .success .rid{margin-top:12px; display:inline-block; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; background:var(--chip); border-radius:8px; padding:5px 10px; color:var(--ink2)}
@@ -794,21 +797,17 @@ function renderChrome(){
   else if(S.screen==='car'){ title=''; }
   const sectionScreen = (S.screen==='service' || S.screen==='listing');
   let html='<div class="topbar" style="position:relative" data-fr="fe01">'
-    + annTag(sectionScreen?'FE-01 · топ-бар · чат (pick_car) + телефон (прямой звонок в КЦ)':'FE-01 · топ-бар','', 'top:2px; left:52px')
+    + annTag(sectionScreen?'FE-01 · топ-бар · телефон (прямой звонок в КЦ)':'FE-01 · топ-бар','', 'top:2px; left:52px')
     + '<button class="icbtn" id="btnBack" aria-label="Назад">'+icon('ic-back',22,22)+'</button>'
     + '<div class="tb-title">'+esc(title)+'</div>'
     + (sectionScreen
-        ? '<button class="icbtn" id="btnChatTop" aria-label="Чат подбора авто" style="position:relative">'+icon('ic-chat',21,21)
-          + '<span style="position:absolute;top:7px;right:6px;width:8px;height:8px;border-radius:50%;background:#22C55E;border:1.5px solid var(--card)"></span></button>'
-          + '<button class="icbtn" id="btnCall" aria-label="Заказать звонок менеджера">'+icon('ic-phone',21,21)+'</button>'
+        ? '<button class="icbtn" id="btnCall" aria-label="Позвонить в колл-центр">'+icon('ic-phone',21,21)+'</button>'
         : '<button class="icbtn" aria-label="Поделиться">'+icon('ic-share',20,20)+'</button>')
     + '</div>';
   ch.innerHTML=html;
   $('#btnBack').onclick=goBack;
   const bc=$('#btnCall');
   if(bc) bc.onclick=()=>{ track('topbar_call_tap',{screen:S.screen, mode:'direct_call'}); openCallSheet(); };
-  const bch=$('#btnChatTop');
-  if(bch) bch.onclick=()=>{ track('pick_car_tap',{source:'topbar_chat'}); openChat('pick_car'); };
 }
 
 /* ============================== ЭКРАН: ВИТРИНА ============================== */
@@ -851,11 +850,11 @@ const COLLS_USED=[
   {cap:'Универсалы',   type:'body', value:'универсал',   fs:{state:'used', body:'универсал'},   art:carArt('hatch','#A855F7')},
 ];
 
-function shelfHTML(key, sub, annNote){
+function shelfHTML(key, sub, annNote, accent){
   const setDef = FILTER_SETS[key];
   const cars = queryCars(setDef.fs).slice(0,7); // 7 товаров на мобильном; остальные — по «Ещё»
   if(!cars.length) return ''; // пустая полка скрывается (FR-04)
-  return '<section class="shelf" style="position:relative" data-fr="fe04">'
+  return '<section class="shelf'+(accent?' accent':'')+'" style="position:relative" data-fr="fe04">'
     + annTag('FE-04 · полка · filter_set='+JSON.stringify(setDef.fs),'', 'top:-2px; left:14px')
     + '<div class="shelf-head"><button class="sh-t" data-shelf="'+key+'" style="text-align:left">'+esc(setDef.name)
     + (sub?'<span class="sh-sub">'+esc(sub)+'</span>':'')+'</button>'
@@ -904,7 +903,7 @@ function renderServiceNew(){
     +   COLLS.map((c,i)=>'<button class="coll-item" data-coll="'+i+'"><span class="coll-tile">'+c.art+'</span>'
     +     '<span class="cc-cap">'+esc(c.cap)+'</span></button>').join('')
     + '</div>'
-    + shelfHTML('exclusive','', 'FR-04: «Ещё»/заголовок → FE-09 с чипом «Эксклюзивно на Wildberries»; фильтр можно снять')
+    + shelfHTML('exclusive','', 'FR-04: полка выделена цветным фоном (комментарий из БТ); «Ещё» → FE-09 с чипом, фильтр можно снять', true)
     + shelfHTML('special','', 'FR-04: filter_set = «в кредит со спецпредложением» (ACT-03); госпрограммы из полки исключены — для клиента госпрограмма = скидка, не смешиваем с кредитом')
     + '<div class="teasers-wrap" data-fr="fe06">'
     +   annTag('FE-06 · тизеры: подбор → форма обратного звонка (banner_callback) · запчасти → категория','ep','top:-4px; left:14px')
@@ -979,7 +978,7 @@ function renderServiceUsed(){
     +   annTag('тизеры БУ: обратный звонок в ККС · автотовары','ep','top:-4px; left:14px')
     +   '<div class="teasers">'
     +   '<button class="teaser" id="btnKks" style="background:var(--brand-grad)">'
-    +     '<b>Обратный звонок в ККС</b><small>Оставить заявку — оператор перезвонит →</small>'
+    +     '<b>Поможем подобрать авто за вас</b><small>Оставить заявку — оператор перезвонит →</small>'
     +     '<span class="t-art" style="color:#F3E3FA; display:flex; align-items:center; justify-content:flex-end; width:100px; bottom:20px; right:18px">'+icon('ic-phone',46,46)+'</span></button>'
     +   '<button class="teaser" id="btnGoods" style="background:linear-gradient(110deg,#1D2A3A,#37517A 70%,#54759E)">'
     +     '<b>Покупай автотовары на WB</b><small>Перейти в категорию →</small>'
