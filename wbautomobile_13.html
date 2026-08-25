@@ -97,6 +97,11 @@ svg{display:block}
 .cta-overlay .cta:disabled:active{transform:none}
 
 
+/* Переключатель витрин «Новые авто / С пробегом» */
+.mkt-toggle{display:flex; gap:6px; background:var(--chip); border-radius:14px; padding:4px; margin:10px 14px 2px}
+.mkt-btn{flex:1; height:40px; border-radius:11px; font-size:14px; font-weight:700; color:var(--ink2); transition:all .15s}
+.mkt-btn.on{background:var(--brand-grad); color:#fff; box-shadow:0 4px 12px rgba(160,20,200,.3)}
+
 /* Карусель FE-03 */
 .carousel-wrap{padding:10px 0 2px}
 .carousel{display:flex; gap:8px; overflow-x:auto; scroll-snap-type:x mandatory; padding:0 14px; scrollbar-width:none}
@@ -141,6 +146,7 @@ svg{display:block}
 .badge.credit{background:var(--lav); color:var(--violet)}
 .badge.gos{background:#E3F5EA; color:var(--green)}
 .badge.excl{background:#FCE9F7; color:var(--brand)}
+.badge.wbcheck{background:#E7F0FB; color:#2563EB}
 .deliv{margin-top:6px; background:var(--lav); color:var(--violet); font-size:11px; font-weight:700; border-radius:9px; padding:6px 8px; text-align:center}
 
 /* Тизеры — низкие широкие скроллящиеся плашки (референс «сделано дома») FE-06 */
@@ -507,6 +513,16 @@ const CARS = [
   {id:118, brand:'Omoda', model:'C5', trim:'Supreme', year:2026, price:2429000, old:2610000, rating:4.7, votes:231, body:'кроссовер', kind:'suv', color:'#2F6E5C', bg:'linear-gradient(160deg,#ECF5F1,#D7E9E2)', engine:'бензин', kpp:'CVT', drive:'передний', state:'new', city:'Москва', excl:true, agr:false, solaris:false, creditRate:5.5, creditSpec:true, gos:0, pop:84},
   {id:119, brand:'Kia', model:'Rio', trim:'1.6 AT / 2019', year:2019, price:1289000, old:0, rating:4.6, votes:64, body:'седан', kind:'sedan', color:'#9A2B2B', bg:'linear-gradient(160deg,#F7EFEE,#ECDBD8)', engine:'бензин', kpp:'AT', drive:'передний', state:'used', mileage:78000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:12.5, creditSpec:false, gos:0, pop:60},
   {id:120, brand:'Hyundai', model:'Creta', trim:'2.0 AT / 2021', year:2021, price:1899000, old:0, rating:4.7, votes:83, body:'кроссовер', kind:'suv', color:'#C8CCD4', bg:'linear-gradient(160deg,#F2F3F6,#E1E4EA)', engine:'бензин', kpp:'AT', drive:'полный', state:'used', mileage:52000, city:'Санкт-Петербург', excl:false, agr:false, solaris:false, creditRate:12.5, creditSpec:false, gos:0, pop:65},
+  {id:130, brand:'Toyota', model:'RAV4', trim:'2.0 AT / 2020', year:2020, price:2890000, old:0, rating:4.9, votes:141, body:'кроссовер', kind:'suv', color:'#5B6B7C', bg:'linear-gradient(160deg,#EFF2F5,#DFE4EA)', engine:'бензин', kpp:'AT', drive:'полный', state:'used', mileage:64000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:12.9, creditSpec:false, gos:0, pop:72},
+  {id:131, brand:'Toyota', model:'Land Cruiser Prado', trim:'2.8D AT / 2019', year:2019, price:4590000, old:0, rating:4.9, votes:96, body:'внедорожник', kind:'suv', color:'#2C2C34', bg:'linear-gradient(160deg,#EEEFF2,#DADCE2)', engine:'дизель', kpp:'AT', drive:'полный', state:'used', mileage:98000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:12.9, creditSpec:false, gos:0, pop:70},
+  {id:132, brand:'Kia', model:'Sportage', trim:'2.0 AT / 2021', year:2021, price:2490000, old:0, rating:4.8, votes:88, body:'кроссовер', kind:'suv', color:'#7A3A46', bg:'linear-gradient(160deg,#F6EFF1,#EAD9DD)', engine:'бензин', kpp:'AT', drive:'полный', state:'used', mileage:45000, city:'Санкт-Петербург', excl:false, agr:false, solaris:false, creditRate:12.5, creditSpec:false, gos:0, pop:69},
+  {id:133, brand:'Hyundai', model:'Solaris', trim:'1.6 AT / 2019', year:2019, price:1190000, old:0, rating:4.6, votes:132, body:'седан', kind:'sedan', color:'#B8BDC9', bg:'linear-gradient(160deg,#F1F3F6,#E1E5EB)', engine:'бензин', kpp:'AT', drive:'передний', state:'used', mileage:88000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:13.5, creditSpec:false, gos:0, pop:63},
+  {id:134, brand:'VW', model:'Polo', trim:'1.6 AT / 2020', year:2020, price:1390000, old:0, rating:4.7, votes:104, body:'седан', kind:'sedan', color:'#8E9BA8', bg:'linear-gradient(160deg,#F0F2F4,#E0E4E9)', engine:'бензин', kpp:'AT', drive:'передний', state:'used', mileage:49000, city:'Казань', excl:false, agr:false, solaris:false, creditRate:12.9, creditSpec:false, gos:0, pop:66},
+  {id:135, brand:'Lada', model:'Vesta SW', trim:'1.6 MT / 2021', year:2021, price:1150000, old:0, rating:4.6, votes:97, body:'универсал', kind:'hatch', color:'#B4832F', bg:'linear-gradient(160deg,#F8F3E9,#EEE3CC)', engine:'бензин', kpp:'MT', drive:'передний', state:'used', mileage:38000, city:'Самара', excl:false, agr:false, solaris:false, creditRate:13.9, creditSpec:false, gos:0, pop:61},
+  {id:136, brand:'UAZ', model:'Patriot', trim:'2.7 MT / 2021', year:2021, price:1250000, old:0, rating:4.4, votes:73, body:'внедорожник', kind:'suv', color:'#3A5A3C', bg:'linear-gradient(160deg,#EEF4EE,#DCE8DC)', engine:'бензин', kpp:'MT', drive:'полный', state:'used', mileage:42000, city:'Екатеринбург', excl:false, agr:false, solaris:false, creditRate:13.9, creditSpec:false, gos:0, pop:56},
+  {id:137, brand:'Skoda', model:'Rapid', trim:'1.6 AT / 2019', year:2019, price:1290000, old:0, rating:4.6, votes:85, body:'лифтбек', kind:'hatch', color:'#9A2B2B', bg:'linear-gradient(160deg,#F7EFEE,#ECDBD8)', engine:'бензин', kpp:'AT', drive:'передний', state:'used', mileage:72000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:13.5, creditSpec:false, gos:0, pop:59},
+  {id:138, brand:'Nissan', model:'Qashqai', trim:'2.0 CVT / 2019', year:2019, price:1990000, old:0, rating:4.7, votes:91, body:'кроссовер', kind:'suv', color:'#54326A', bg:'linear-gradient(160deg,#F2EEF6,#E3D9EC)', engine:'бензин', kpp:'CVT', drive:'передний', state:'used', mileage:79000, city:'Москва', excl:false, agr:false, solaris:false, creditRate:12.9, creditSpec:false, gos:0, pop:64},
+  {id:139, brand:'Mazda', model:'CX-5', trim:'2.0 AT / 2018', year:2018, price:2350000, old:0, rating:4.8, votes:110, body:'кроссовер', kind:'suv', color:'#8A1F2D', bg:'linear-gradient(160deg,#F8EEEF,#EDD8DB)', engine:'бензин', kpp:'AT', drive:'полный', state:'used', mileage:105000, city:'Санкт-Петербург', excl:false, agr:false, solaris:false, creditRate:12.9, creditSpec:false, gos:0, pop:67},
   {id:121, brand:'Solaris', model:'Uni V', trim:'Prestige', year:2026, price:2359000, old:2590000, rating:4.8, votes:74, body:'лифтбек', kind:'hatch', color:'#37517A', bg:'linear-gradient(160deg,#EDF1F7,#DAE2EF)', engine:'бензин', kpp:'AT', drive:'передний', state:'new', city:'Москва', excl:true, agr:true, solaris:true, creditRate:3.5, creditSpec:true, gos:0, pop:89},
   {id:122, brand:'Voyah', model:'Free', trim:'Ultimate', year:2026, price:6290000, old:6690000, rating:4.8, votes:112, body:'кроссовер', kind:'suv', color:'#2E4B44', bg:'linear-gradient(160deg,#ECF4F1,#D8E8E1)', engine:'гибрид', kpp:'AT', drive:'полный', state:'new', city:'Москва', excl:true, agr:false, solaris:false, creditRate:6.9, creditSpec:false, gos:0, pop:71},
   {id:123, brand:'Lixiang', model:'L7', trim:'Pro', year:2026, price:6990000, old:0, rating:4.9, votes:158, body:'кроссовер', kind:'suv', color:'#4A4E5A', bg:'linear-gradient(160deg,#F0F1F4,#DEE0E6)', engine:'гибрид', kpp:'AT', drive:'полный', state:'new', city:'Москва', excl:false, agr:false, solaris:false, creditRate:7.5, creditSpec:false, gos:0, pop:83},
@@ -611,10 +627,13 @@ const FILTER_SETS = {
   creditAll: { name:'Авто в кредит', fs:{creditOpt:'credit'} },
   subsidized:{ name:'Субсидированный кредит', fs:{creditOpt:'credit_special'} },
   gosprog:   { name:'Госпрограмма', fs:{gos:true} },
+  used50:    { name:'Машины до 50 тыс. пробега', fs:{state:'used', mileageMax:50000} },
+  used2m:    { name:'Автомобили до 2 млн', fs:{state:'used', priceMax:2000000} },
 };
 
 /* ============================== СОСТОЯНИЕ ============================== */
 const S = {
+  market:'new',              // new | used — переключатель витрин
   screen:'service',            // service | listing | promo | tradein | car
   nav:[],                      // стек для «Назад»
   listing:{ fs:{}, title:'Автомобили', entry:null, sort:'pop' },
@@ -690,6 +709,7 @@ function matches(c, fs){
   if(fs.drive && c.drive!==fs.drive) return false;
   if(fs.city && c.city!==fs.city) return false;
   if(fs.priceMin && c.price<fs.priceMin) return false;
+  if(fs.mileageMax && (c.mileage||0)>fs.mileageMax) return false;
   if(fs.priceMax && c.price>fs.priceMax) return false;
   if(fs.query){
     const q=fs.query.toLowerCase();
@@ -729,6 +749,7 @@ function chipList(fs){
   if(fs.drive) add('drive','Привод: '+fs.drive);
   if(fs.city) add('city',fs.city);
   if(fs.priceMin) add('priceMin','от '+fmt(fs.priceMin));
+  if(fs.mileageMax) add('mileageMax','Пробег до '+fmtK(fs.mileageMax)+' тыс. км');
   if(fs.priceMax) add('priceMax','до '+fmt(fs.priceMax));
   return chips;
 }
@@ -744,6 +765,7 @@ function snippetHTML(c, ctx){
   if(c.creditRate) badges += '<span class="badge credit">Автокредит от '+String(c.creditRate).replace('.',',')+'%</span>';
   if(c.gos) badges += '<span class="badge gos">−'+fmtK(c.gos)+' тыс. ₽ по госпрограмме</span>';
   if(c.excl && ctx!=='shelf-exclusive') badges += '<span class="badge excl">Эксклюзив Wildberries</span>';
+  if(c.state==='used') badges += '<span class="badge wbcheck">Проверено WB</span>';
   const deliv = ctx==='feed' ? '<div class="deliv">Доставка 14–18 августа</div>' : '';
   return '<button class="snippet" data-car="'+c.id+'" data-ctx="'+(ctx||'')+'" style="--ph-bg:'+c.bg+'" aria-label="'+esc(c.brand+' '+c.model)+'">'
     + '<span class="ph">'+carSVG(c)
@@ -812,6 +834,23 @@ const SLIDES = [
    bgcss:'linear-gradient(120deg,#4A2A06,#B4741B 78%,#DBA13F)', art:'<svg viewBox="0 0 240 120" style="--c:#EFE1C8"><use href="#car-ev"/></svg>'},
 ];
 
+const SLIDES_USED = [
+  {id:'checked', kick:'С пробегом', title:'Проверено WB', sub:'Отчёт 150+ пунктов в каждой карточке товара', entry:'banner_checked',
+   bgcss:'linear-gradient(120deg,#0E3B4B,#1E7EA0 78%,#3BB1D8)', art:'<svg viewBox="0 0 240 120" style="--c:#CFE7F1"><use href="#car-suv"/></svg>'},
+  {id:'warranty', kick:'', title:'Гарантия на&nbsp;каждый автомобиль', sub:'', entry:'banner_warranty',
+   bgcss:'linear-gradient(120deg,#123A22,#1F8A4C 80%,#3FC077)', art:'<svg viewBox="0 0 240 120" style="--c:#D2EBDA"><use href="#car-sedan"/></svg>'},
+  {id:'usedcredit', kick:'', title:'Специальные кредиты для авто с&nbsp;пробегом', sub:'Ставки от 0,01%', entry:'banner_used_credit',
+   bgcss:'linear-gradient(120deg,#3A0B63,#7C1AF5 75%,#A22BE0)', art:'<svg viewBox="0 0 240 120" style="--c:#E2D6F5"><use href="#car-hatch"/></svg>'},
+  {id:'tradein2', kick:'', title:'Трейд-ин с&nbsp;CarPrice', sub:'Оценка онлайн — деньги в день продажи', entry:'banner_tradein',
+   bgcss:'linear-gradient(120deg,#4A2A06,#B4741B 78%,#DBA13F)', art:'<svg viewBox="0 0 240 120" style="--c:#EFE1C8"><use href="#car-ev"/></svg>'},
+];
+const COLLS_USED=[
+  {cap:'Кроссоверы',   type:'body', value:'кроссовер',   fs:{state:'used', body:'кроссовер'},   art:carArt('suv','#7C3AED')},
+  {cap:'Внедорожники', type:'body', value:'внедорожник', fs:{state:'used', body:'внедорожник'}, art:carArt('suv','#6D28D9')},
+  {cap:'Седаны',       type:'body', value:'седан',       fs:{state:'used', body:'седан'},       art:carArt('sedan','#8B5CF6')},
+  {cap:'Универсалы',   type:'body', value:'универсал',   fs:{state:'used', body:'универсал'},   art:carArt('hatch','#A855F7')},
+];
+
 function shelfHTML(key, sub, annNote){
   const setDef = FILTER_SETS[key];
   const cars = queryCars(setDef.fs).slice(0,7); // 7 товаров на мобильном; остальные — по «Ещё»
@@ -826,10 +865,29 @@ function shelfHTML(key, sub, annNote){
     + '</section>';
 }
 
+function marketToggleHTML(){
+  return '<div class="mkt-toggle" role="tablist" aria-label="Тип автомобилей">'
+    + '<button class="mkt-btn'+(S.market==='new'?' on':'')+'" data-mkt="new" role="tab" aria-selected="'+(S.market==='new')+'">Новые авто</button>'
+    + '<button class="mkt-btn'+(S.market==='used'?' on':'')+'" data-mkt="used" role="tab" aria-selected="'+(S.market==='used')+'">С пробегом</button>'
+    + '</div>';
+}
+function bindMarketToggle(){
+  document.querySelectorAll('[data-mkt]').forEach(b=>b.onclick=()=>{
+    if(S.market===b.dataset.mkt) return;
+    S.market=b.dataset.mkt;
+    track('market_switch',{market:S.market});
+    renderService(); $('#scroll').scrollTop=0; updateCtx();
+  });
+}
 function renderService(){
-  const feed = applySort(CARS.filter(c=>c.pop>55),'pop');
+  if(S.market==='used'){ renderServiceUsed(); } else { renderServiceNew(); }
+  bindMarketToggle();
+}
+function renderServiceNew(){
+  const feed = applySort(CARS.filter(c=>c.state==='new' && c.pop>55),'pop');
   $('#scroll').innerHTML =
     '<div class="scroll-pad">'
+    + marketToggleHTML()
     + '<div class="carousel-wrap" style="position:relative" data-fr="fe03">'
     +   annTag('FE-03 · карусель, 5 слайдов · автопрокрутка','', 'top:0px; left:14px')
     +   '<div class="carousel" id="carousel">'+SLIDES.map(slideHTML).join('')+'</div>'
@@ -893,8 +951,73 @@ function renderService(){
   track('recommend_feed_view');
 }
 
+/* ============ Витрина «С пробегом» ============ */
+function renderServiceUsed(){
+  const feed = applySort(CARS.filter(c=>c.state==='used'),'pop');
+  $('#scroll').innerHTML =
+    '<div class="scroll-pad">'
+    + marketToggleHTML()
+    + '<div class="carousel-wrap" style="position:relative" data-fr="fe03">'
+    +   annTag('FE-03 · карусель БУ, 4 слайда · листание вручную','', 'top:0px; left:14px')
+    +   '<div class="carousel" id="carousel">'+SLIDES_USED.map(slideHTML).join('')+'</div>'
+    +   '<div class="dots" id="dots">'+SLIDES_USED.map((_,i)=>'<i'+(i===0?' class="on"':'')+'></i>').join('')+'</div>'
+    + '</div>'
+    + '<div class="paramsrow" data-fr="fe02">'
+    +   annTag('FE-02 · «Поиск по параметрам» → каталог авто с пробегом','', 'top:-2px; left:16px')
+    +   '<button class="params-btn" id="btnParams">Поиск по параметрам</button>'
+    + '</div>'
+    + '<div class="shelf-head" style="position:relative; margin-top:6px" data-fr="coll"><span class="sh-t">Подборки</span>'
+    +   annTag('подборки по типу кузова · только авто с пробегом','', 'top:4px; left:130px')
+    + '</div>'
+    + '<div class="coll" data-fr="coll">'
+    +   COLLS_USED.map((c,i)=>'<button class="coll-item" data-coll="'+i+'"><span class="coll-tile">'+c.art+'</span>'
+    +     '<span class="cc-cap">'+esc(c.cap)+'</span></button>').join('')
+    + '</div>'
+    + shelfHTML('used50','', 'Полка БУ: filter_set = состояние «с пробегом» + пробег до 50 тыс. км; чипы снимаемые')
+    + shelfHTML('used2m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 2 млн ₽; чипы снимаемые')
+    + '<div class="teasers-wrap" data-fr="fe06">'
+    +   annTag('тизеры БУ: обратный звонок в ККС · автотовары','ep','top:-4px; left:14px')
+    +   '<div class="teasers">'
+    +   '<button class="teaser" id="btnKks" style="background:var(--brand-grad)">'
+    +     '<b>Обратный звонок в ККС</b><small>Оставить заявку — оператор перезвонит →</small>'
+    +     '<span class="t-art" style="color:#F3E3FA; display:flex; align-items:center; justify-content:flex-end; width:100px; bottom:20px; right:18px">'+icon('ic-phone',46,46)+'</span></button>'
+    +   '<button class="teaser" id="btnGoods" style="background:linear-gradient(110deg,#1D2A3A,#37517A 70%,#54759E)">'
+    +     '<b>Покупай автотовары на WB</b><small>Перейти в категорию →</small>'
+    +     '<span class="t-art" style="color:#C9D6EA; display:flex; align-items:center; justify-content:flex-end; width:100px; bottom:16px; right:16px">'+icon('ic-wrench',48,48)+'</span></button>'
+    +   '</div></div>'
+    + '<div class="feed-wrap" data-fr="fe07">'
+    + '<div class="feed-head" style="position:relative">Рекомендуем'
+    +   annTag('FE-07 · рекомендации в пределах авто с пробегом','', 'top:4px; left:150px')
+    + '</div>'
+    + '<div class="feed">'+feed.map(c=>snippetHTML(c,'feed')).join('')+'</div>'
+    + '<div class="feed-note">Лента формируется рекомендательной системой WB в пределах раздела «Автомобили с пробегом»</div>'
+    + '</div>'
+    + '</div>';
+  renderCTA('service');
+  bindSnippets();
+  bindCarousel();
+  $('#btnParams').onclick=()=>{ track('params_search_tap',{market:'used'}); openListing({state:'used'}, 'Автомобили с пробегом', 'params_button_used'); };
+  $('#btnKks').onclick=()=>{ track('teaser_kks_callback_tap'); openLeadForm('kks_callback'); };
+  $('#btnGoods').onclick=()=>{ track('teaser_goods_tap'); toast('Переход в категорию «Автотовары» Wildberries — вне рамок прототипа'); };
+  document.querySelectorAll('[data-coll]').forEach(b=>b.onclick=()=>{
+    const c=COLLS_USED[+b.dataset.coll];
+    track('collection_tap',{market:'used', type:c.type, value:c.value});
+    openListing(c.fs, c.cap+' с пробегом', 'collection_used_'+c.value);
+  });
+  document.querySelectorAll('[data-shelf]').forEach(b=>b.onclick=()=>{
+    const key=b.dataset.shelf;
+    track('shelf_more_tap',{shelf_id:key});
+    openListing(FILTER_SETS[key].fs, FILTER_SETS[key].name, 'shelf_'+key);
+  });
+  track('service_page_view',{market:'used'});
+  track('shelf_view',{shelf_id:'used50'});
+  track('shelf_view',{shelf_id:'used2m'});
+  track('recommend_feed_view',{market:'used'});
+}
+
 /* Карусель: автопрокрутка + точки, остановка при взаимодействии */
 function bindCarousel(){
+  const SL = (S.screen==='service' && S.market==='used') ? SLIDES_USED : SLIDES;
   const car=$('#carousel'), dots=$('#dots');
   if(!car) return;
   clearInterval(S.carousel.timer); S.carousel.idx=0; S.carousel.paused=false;
@@ -902,19 +1025,23 @@ function bindCarousel(){
   function setDot(i){ [...dots.children].forEach((d,j)=>d.classList.toggle('on', i===j)); }
   car.addEventListener('scroll', ()=>{
     const i=Math.round(car.scrollLeft/slideW());
-    if(i!==S.carousel.idx && i>=0 && i<SLIDES.length){ S.carousel.idx=i; setDot(i); track('carousel_slide_view',{slide_id:SLIDES[i].id}); }
+    if(i!==S.carousel.idx && i>=0 && i<SL.length){ S.carousel.idx=i; setDot(i); track('carousel_slide_view',{slide_id:SL[i].id}); }
   }, {passive:true});
   /* Карусель статичная (правка 6): автоскролл выключен, листание только вручную свайпом */
   car.querySelectorAll('.slide').forEach(sl=>sl.onclick=()=>{
-    const def=SLIDES.find(s=>s.id===sl.dataset.slide);
+    const def=SL.find(s=>s.id===sl.dataset.slide);
     track('carousel_slide_tap',{slide_id:def.id});
     if(def.id==='utp') openPromo('banner_utp');
     else if(def.id==='tradein'){ track('tradein_slide_tap'); openTradein('banner_tradein'); }
     else if(def.id==='monjaro') openListing(FILTER_SETS.monjaro.fs, FILTER_SETS.monjaro.name, 'banner_monjaro');
     else if(def.id==='solaris') openListing({brand:'Solaris', model:'Uni V'}, 'Спец. предложение Solaris Uni V', 'banner_solaris');
     else if(def.id==='credit') openListing(FILTER_SETS.creditAll.fs, FILTER_SETS.creditAll.name, 'banner_credit');
+    else if(def.id==='checked') openListing({state:'used'}, 'Проверено WB', 'banner_checked');
+    else if(def.id==='warranty') toast('Страница условий гарантии на авто с пробегом — вне рамок прототипа');
+    else if(def.id==='usedcredit') openListing({state:'used', creditOpt:'credit'}, 'Кредит на авто с пробегом', 'banner_used_credit');
+    else if(def.id==='tradein2'){ track('tradein_slide_tap'); openTradein('banner_tradein'); }
   });
-  track('carousel_slide_view',{slide_id:SLIDES[0].id});
+  track('carousel_slide_view',{slide_id:SL[0].id});
 }
 
 /* ============================== ЭКРАН: ЛИСТИНГ FE-09 ============================== */
