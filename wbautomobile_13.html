@@ -631,7 +631,8 @@ const FILTER_SETS = {
   subsidized:{ name:'Субсидированный кредит', fs:{creditOpt:'credit_special'} },
   gosprog:   { name:'Госпрограмма', fs:{gos:true} },
   used50:    { name:'Машины до 50 тыс. пробега', fs:{state:'used', mileageMax:50000} },
-  used2m:    { name:'Автомобили до 1 млн', fs:{state:'used', priceMax:1000000} },
+  used1m:    { name:'Автомобили до 1 млн', fs:{state:'used', priceMax:1000000} },
+  used2m:    { name:'Автомобили до 2 млн', fs:{state:'used', priceMax:2000000} },
 };
 
 /* ============================== СОСТОЯНИЕ ============================== */
@@ -973,7 +974,8 @@ function renderServiceUsed(){
     +     '<span class="cc-cap">'+esc(c.cap)+'</span></button>').join('')
     + '</div>'
     + shelfHTML('used50','', 'Полка БУ: filter_set = состояние «с пробегом» + пробег до 50 тыс. км; чипы снимаемые')
-    + shelfHTML('used2m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 1 млн ₽; полка выделена цветным фоном; чипы снимаемые', true)
+    + shelfHTML('used1m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 1 млн ₽; полка выделена цветным фоном; чипы снимаемые', true)
+    + shelfHTML('used2m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 2 млн ₽; чипы снимаемые')
     + '<div class="teasers-wrap" data-fr="fe06">'
     +   annTag('тизеры БУ: обратный звонок в ККС · автотовары','ep','top:-4px; left:14px')
     +   '<div class="teasers">'
@@ -1010,6 +1012,7 @@ function renderServiceUsed(){
   });
   track('service_page_view',{market:'used'});
   track('shelf_view',{shelf_id:'used50'});
+  track('shelf_view',{shelf_id:'used1m'});
   track('shelf_view',{shelf_id:'used2m'});
   track('recommend_feed_view',{market:'used'});
 }
