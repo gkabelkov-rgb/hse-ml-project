@@ -1,7 +1,7 @@
 <!-- WB Авто · Страница Сервиса «Автомобили» · интерактивный макет по БТ V2 от 23.07.2026 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>WB Авто — Автомобили</title>
+<title>WB Авто — Новые автомобили</title>
 <style>
 /* ============================== ВЕРСТАК (вокруг телефона) ============================== */
 :root{
@@ -870,6 +870,9 @@ function shelfHTML(key, sub, annNote, accent){
 }
 
 function marketToggleHTML(){
+  return ''; // версия «только новые авто»: переключатель рынков отключён
+}
+function marketToggleHTML_disabled(){
   return '<div class="mkt-toggle" role="tablist" aria-label="Тип автомобилей">'
     + '<button class="mkt-btn'+(S.market==='new'?' on':'')+'" data-mkt="new" role="tab" aria-selected="'+(S.market==='new')+'">Новые авто</button>'
     + '<button class="mkt-btn'+(S.market==='used'?' on':'')+'" data-mkt="used" role="tab" aria-selected="'+(S.market==='used')+'">С пробегом</button>'
