@@ -86,7 +86,8 @@ svg{display:block}
 
 .scroll{flex:1; overflow-y:auto; overflow-x:hidden; position:relative; overscroll-behavior:contain; scrollbar-width:none}
 .scroll::-webkit-scrollbar{display:none}
-.scroll-pad{padding-bottom:96px} /* отступ под кнопку-оверлей FE-08 */
+.scroll-pad{padding-bottom:96px}
+.scroll.no-cta .scroll-pad{padding-bottom:28px} /* отступ под кнопку-оверлей FE-08 */
 
 /* Кнопка-оверлей FE-08 */
 .cta-overlay{position:absolute; left:0; right:0; bottom:0; padding:10px 14px 20px; z-index:25;
@@ -1372,16 +1373,14 @@ function renderCar(){
 /* ============================== КНОПКА-ОВЕРЛЕЙ FE-08 / CTA ============================== */
 function renderCTA(screen){
   const z=$('#ctaZone');
+  $('#scroll').classList.remove('no-cta');
   z.setAttribute('data-fr','fe08');
   if(screen==='service' || screen==='listing' || screen==='promo'){
-    const ep = screen==='service' ? 'overlay_service' : screen==='listing' ? 'overlay_listing' : 'promo_page';
-    z.innerHTML = annTag('FE-08 · оверлей → чат FE-12 (entry_point='+ep+')','ep','top:-8px; left:20px')
-      + '<button class="cta" id="ctaBtn">Связаться с оператором</button>';
-    $('#ctaBtn').onclick=()=>{
-      track('overlay_button_tap',{screen, target:'chat'});
-      openChat('pick_car');
-    };
-    track('overlay_button_view',{screen});
+    /* Кнопка-оверлей «Связаться с оператором» убрана (правка) */
+    z.innerHTML='';
+    z.removeAttribute('data-fr');
+    $('#scroll').classList.add('no-cta');
+    return;
   } else if(screen==='tradein'){
     z.setAttribute('data-fr','fe11');
     if(TI.estimate){
