@@ -98,6 +98,21 @@ svg{display:block}
 .cta-overlay .cta:disabled:active{transform:none}
 
 
+/* Подсказки поиска */
+.sug{display:flex; flex-direction:column; gap:6px; margin-top:4px}
+.sug button{text-align:left; background:var(--card); border-radius:12px; padding:12px 14px; font-size:14px; font-weight:600; color:var(--ink); display:flex; gap:10px; align-items:center}
+.sug button svg{color:var(--ink2); flex:none}
+.sug .sug-sub{margin-left:auto; font-size:11.5px; color:var(--ink2); font-weight:600; font-variant-numeric:tabular-nums}
+
+/* Подвитрина «Проверенные авто с пробегом» и чёрная полка «Все авто» */
+.subvitrine{background:#1C1924; border:1px solid #2E2A3A; border-radius:24px; margin:16px 8px 0; padding:14px 0 6px; overflow:hidden}
+.subv-head{font-size:18px; font-weight:800; letter-spacing:-.3px; padding:0 14px}
+.subvitrine .shelf.accent{margin:12px 8px 4px}
+.subvitrine .teasers-wrap{margin-top:12px; padding-bottom:10px}
+.shelf.black{background:#000; border-radius:24px; margin:16px 8px 0; padding:4px 0 12px}
+.shelf.black .sh-t{color:#fff}
+.shelf.black .more{color:#D9A7F5}
+
 /* Переключатель витрин «Новые авто / С пробегом» */
 .mkt-toggle{display:flex; gap:6px; background:var(--chip); border-radius:14px; padding:4px; margin:10px 14px 2px}
 .mkt-btn{flex:1; height:40px; border-radius:11px; font-size:14px; font-weight:700; color:var(--ink2); transition:all .15s}
@@ -634,6 +649,7 @@ const FILTER_SETS = {
   gosprog:   { name:'Госпрограмма', fs:{gos:true} },
   creditNew: { name:'Можно в кредит', fs:{state:'new', creditOpt:'credit'} },
   allNew:    { name:'Новые авто', fs:{state:'new'} },
+  allCars:   { name:'Все авто', fs:{} },
   used50:    { name:'Машины до 50 тыс. пробега', fs:{state:'used', mileageMax:50000} },
   used1m:    { name:'Автомобили до 1 млн', fs:{state:'used', priceMax:1000000} },
   used2m:    { name:'Автомобили до 2 млн', fs:{state:'used', priceMax:2000000} },
@@ -801,21 +817,17 @@ function renderChrome(){
   else if(S.screen==='car'){ title=''; }
   const sectionScreen = (S.screen==='service' || S.screen==='listing');
   let html='<div class="topbar" style="position:relative" data-fr="fe01">'
-    + annTag(sectionScreen?(S.market==='new'?'FE-01 · топ-бар · значок поиска → каталог':'FE-01 · топ-бар · телефон (прямой звонок в КЦ)'):'FE-01 · топ-бар','', 'top:2px; left:52px')
+    + annTag(sectionScreen?'FE-01 · топ-бар · поиск по марке и модели':'FE-01 · топ-бар','', 'top:2px; left:52px')
     + '<button class="icbtn" id="btnBack" aria-label="Назад">'+icon('ic-back',22,22)+'</button>'
     + '<div class="tb-title">'+esc(title)+'</div>'
     + (sectionScreen
-        ? (S.market==='new'
-            ? '<button class="icbtn" id="btnSearchTop" aria-label="Поиск по каталогу">'+icon('ic-search',21,21)+'</button>'
-            : '<button class="icbtn" id="btnCall" aria-label="Позвонить в колл-центр">'+icon('ic-phone',21,21)+'</button>')
+        ? '<button class="icbtn" id="btnSearchTop" aria-label="Поиск по марке и модели">'+icon('ic-search',21,21)+'</button>'
         : '<button class="icbtn" aria-label="Поделиться">'+icon('ic-share',20,20)+'</button>')
     + '</div>';
   ch.innerHTML=html;
   $('#btnBack').onclick=goBack;
-  const bc=$('#btnCall');
-  if(bc) bc.onclick=()=>{ track('topbar_call_tap',{screen:S.screen, mode:'direct_call'}); openCallSheet(); };
   const bs=$('#btnSearchTop');
-  if(bs) bs.onclick=()=>{ track('topbar_search_tap',{screen:S.screen}); openListing({}, 'Автомобили', 'topbar_search'); };
+  if(bs) bs.onclick=()=>{ track('topbar_search_tap',{screen:S.screen, market:S.market}); openSearchSheet(); };
 }
 
 /* ============================== ЭКРАН: ВИТРИНА ============================== */
@@ -860,7 +872,7 @@ function shelfHTML(key, sub, annNote, accent){
   const setDef = FILTER_SETS[key];
   const cars = queryCars(setDef.fs).slice(0,7); // 7 товаров на мобильном; остальные — по «Ещё»
   if(!cars.length) return ''; // пустая полка скрывается (FR-04)
-  return '<section class="shelf'+(accent?' accent':'')+'" style="position:relative" data-fr="fe04">'
+  return '<section class="shelf'+(accent?' '+(accent===true?'accent':accent):'')+'" style="position:relative" data-fr="fe04">'
     + annTag('FE-04 · полка · filter_set='+JSON.stringify(setDef.fs),'', 'top:-2px; left:14px')
     + '<div class="shelf-head"><button class="sh-t" data-shelf="'+key+'" style="text-align:left">'+esc(setDef.name)
     + (sub?'<span class="sh-sub">'+esc(sub)+'</span>':'')+'</button>'
@@ -975,6 +987,8 @@ function renderServiceUsed(){
     +   annTag('FE-02 · «Поиск по параметрам» → каталог авто с пробегом','', 'top:-2px; left:16px')
     +   '<button class="params-btn" id="btnParams">Поиск по параметрам</button>'
     + '</div>'
+    + '<div class="subvitrine" data-fr="fe04">'
+    + '<div class="subv-head">Проверенные авто с пробегом</div>'
     + shelfHTML('used50','', 'Полка БУ: filter_set = состояние «с пробегом» + пробег до 50 тыс. км; чипы снимаемые')
     + shelfHTML('used1m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 1 млн ₽; полка выделена цветным фоном; чипы снимаемые', true)
     + shelfHTML('used2m','', 'Полка БУ: filter_set = состояние «с пробегом» + цена до 2 млн ₽; чипы снимаемые')
@@ -995,6 +1009,8 @@ function renderServiceUsed(){
     +     '<b>Покупай автотовары на WB</b><small>Перейти в категорию →</small>'
     +     '<span class="t-art" style="color:#C9D6EA; display:flex; align-items:center; justify-content:flex-end; width:100px; bottom:16px; right:16px">'+icon('ic-wrench',48,48)+'</span></button>'
     +   '</div></div>'
+    + '</div>'
+    + shelfHTML('allCars','', 'Полка «Все авто» на чёрном фоне — весь каталог, новые и с пробегом', 'black')
     + '<div class="feed-wrap" data-fr="fe07">'
     + '<div class="feed-head" style="position:relative">Рекомендуем'
     +   annTag('FE-07 · рекомендации в пределах авто с пробегом','', 'top:4px; left:150px')
@@ -1022,6 +1038,7 @@ function renderServiceUsed(){
   track('service_page_view',{market:'used'});
   track('shelf_view',{shelf_id:'used50'});
   track('shelf_view',{shelf_id:'used1m'});
+  track('shelf_view',{shelf_id:'allCars'});
   track('shelf_view',{shelf_id:'used2m'});
   track('recommend_feed_view',{market:'used'});
 }
@@ -1584,6 +1601,40 @@ function openChat(entry){
 }
 
 /* ---------- Форма «Ваши контакты» (FE-04 колбэка) + экран успеха ---------- */
+/* ---------- Поиск по марке и модели (иконка в топ-баре) ---------- */
+function openSearchSheet(){
+  track('search_open',{market:S.market});
+  const sh=openSheet(
+    '<div class="sh-head"><h3>Поиск</h3><button class="icbtn" data-close>'+icon('ic-x',20,20)+'</button></div>'
+    + '<div class="sh-body">'
+    + '<label class="fld"><span>Марка и модель</span><input id="searchQ" type="search" placeholder="Например, Solaris HS" autocomplete="off"></label>'
+    + '<div class="sug" id="sugList"></div>'
+    + annBlock('Поиск по марке и модели в рамках текущей витрины ('+(S.market==='used'?'авто с пробегом':'новые авто')+'); запрос показывается чипом на выдаче и снимается.')
+    + '<div style="height:10px"></div></div>'
+    + '<div class="sh-foot"><button class="btn-primary" id="searchGo" disabled>Найти</button></div>'
+  );
+  sh.querySelector('[data-close]').onclick=()=>closeSheet();
+  const inp=sh.querySelector('#searchQ'), go=sh.querySelector('#searchGo'), list=sh.querySelector('#sugList');
+  const st=S.market==='used'?'used':'new';
+  const items=[...new Map(CARS.filter(c=>c.state===st).map(c=>[c.brand+' '+c.model, c])).values()];
+  function doSearch(q){
+    closeSheet();
+    track('search_submit',{query:q, market:S.market});
+    openListing({query:q, state:st}, 'Поиск: «'+q+'»', 'topbar_search');
+  }
+  function renderSug(){
+    const q=inp.value.trim().toLowerCase();
+    go.disabled=!q;
+    const found=q?items.filter(c=>(c.brand+' '+c.model).toLowerCase().includes(q)).slice(0,6):[];
+    list.innerHTML=found.map(c=>'<button data-q="'+esc(c.brand+' '+c.model)+'">'+icon('ic-search',15,15)+'<span>'+esc(c.brand+' '+c.model)+'</span><span class="sug-sub">'+fmt(c.price)+'</span></button>').join('');
+    list.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>doSearch(b.dataset.q));
+  }
+  inp.addEventListener('input',renderSug);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&inp.value.trim()) doSearch(inp.value.trim()); });
+  go.onclick=()=>{ if(inp.value.trim()) doSearch(inp.value.trim()); };
+  setTimeout(()=>{ try{inp.focus();}catch(e){} },300);
+}
+
 /* ---------- FAQ маркетплейса проверенных БУ авто (слайд 1 карусели БУ) ---------- */
 const USED_FAQ=[
   ['Как проходит проверка автомобиля?','Каждый автомобиль проходит осмотр специалистом CarPrice по 150 пунктам: кузов, двигатель, ходовая, электрика, юридическая чистота. Полный отчёт — в карточке товара.'],
