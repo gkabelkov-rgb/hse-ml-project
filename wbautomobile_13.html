@@ -104,14 +104,14 @@ svg{display:block}
 .sug button svg{color:var(--ink2); flex:none}
 .sug .sug-sub{margin-left:auto; font-size:11.5px; color:var(--ink2); font-weight:600; font-variant-numeric:tabular-nums}
 
-/* Подвитрина «Проверенные авто с пробегом» и чёрная полка «Все авто» */
+/* Подвитрина «Проверенные авто с пробегом» и фиолетовая полка «Все авто» */
 .subvitrine{background:#1C1924; border:1px solid #2E2A3A; border-radius:24px; margin:16px 8px 0; padding:14px 0 6px; overflow:hidden}
 .subv-head{font-size:18px; font-weight:800; letter-spacing:-.3px; padding:0 14px}
 .subvitrine .shelf.accent{margin:12px 8px 4px}
 .subvitrine .teasers-wrap{margin-top:12px; padding-bottom:10px}
-.shelf.black{background:#000; border-radius:24px; margin:16px 8px 0; padding:4px 0 12px}
-.shelf.black .sh-t{color:#fff}
-.shelf.black .more{color:#D9A7F5}
+.shelf.purple{background:linear-gradient(140deg,#4C1D95 0%,#7C1AF5 140%); border-radius:24px; margin:16px 8px 0; padding:4px 0 12px; box-shadow:0 8px 22px rgba(124,26,245,.22)}
+.shelf.purple .sh-t{color:#fff}
+.shelf.purple .more{color:#EBD6FF}
 
 /* Переключатель витрин «Новые авто / С пробегом» */
 .mkt-toggle{display:flex; gap:6px; background:var(--chip); border-radius:14px; padding:4px; margin:10px 14px 2px}
@@ -1010,7 +1010,7 @@ function renderServiceUsed(){
     +     '<span class="t-art" style="color:#C9D6EA; display:flex; align-items:center; justify-content:flex-end; width:100px; bottom:16px; right:16px">'+icon('ic-wrench',48,48)+'</span></button>'
     +   '</div></div>'
     + '</div>'
-    + shelfHTML('allCars','', 'Полка «Все авто» на чёрном фоне — весь каталог, новые и с пробегом', 'black')
+    + shelfHTML('allCars','', 'Полка «Все авто» на фиолетовом фоне — весь каталог, новые и с пробегом', 'purple')
     + '<div class="feed-wrap" data-fr="fe07">'
     + '<div class="feed-head" style="position:relative">Рекомендуем'
     +   annTag('FE-07 · рекомендации в пределах авто с пробегом','', 'top:4px; left:150px')
