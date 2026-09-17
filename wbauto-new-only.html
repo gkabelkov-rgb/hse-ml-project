@@ -114,14 +114,8 @@ svg{display:block}
 
 /* Переключатель витрин «Новые авто / С пробегом» */
 .mkt-toggle{display:flex; gap:6px; background:var(--chip); border-radius:14px; padding:4px; margin:10px 14px 2px}
-.mkt-btn{flex:1; height:40px; border-radius:11px; font-size:13.5px; font-weight:700; color:var(--ink2); transition:all .15s; white-space:nowrap; padding:0 4px}
+.mkt-btn{flex:1; height:40px; border-radius:11px; font-size:14px; font-weight:700; color:var(--ink2); transition:all .15s}
 .mkt-btn.on{background:var(--brand-grad); color:#fff; box-shadow:0 4px 12px rgba(160,20,200,.3)}
-
-/* Пустая витрина «Автотовары» */
-.goods-empty{display:flex; flex-direction:column; align-items:center; text-align:center; padding:80px 32px 70px; color:var(--ink2)}
-.goods-empty .ge-ic{width:88px; height:88px; border-radius:26px; background:var(--lav); display:flex; align-items:center; justify-content:center; color:#B9A6E8; margin-bottom:18px}
-.goods-empty b{font-size:18px; color:var(--ink); margin-bottom:8px}
-.goods-empty small{font-size:13.5px; line-height:1.5; max-width:280px}
 
 /* Карусель FE-03 */
 .carousel-wrap{padding:10px 0 2px}
@@ -820,7 +814,7 @@ function renderChrome(){
   else if(S.screen==='promo'){ title='WB Авто'; }
   else if(S.screen==='tradein'){ title='Трейд-ин'; }
   else if(S.screen==='car'){ title=''; }
-  const sectionScreen = (S.screen==='service' || S.screen==='listing') && S.market!=='goods';
+  const sectionScreen = (S.screen==='service' || S.screen==='listing');
   let html='<div class="topbar" style="position:relative" data-fr="fe01">'
     + annTag(sectionScreen?'FE-01 · топ-бар · поиск по марке и модели':'FE-01 · топ-бар','', 'top:2px; left:52px')
     + '<button class="icbtn" id="btnBack" aria-label="Назад">'+icon('ic-back',22,22)+'</button>'
@@ -894,7 +888,6 @@ function marketToggleHTML_disabled(){
   return '<div class="mkt-toggle" role="tablist" aria-label="Тип автомобилей">'
     + '<button class="mkt-btn'+(S.market==='new'?' on':'')+'" data-mkt="new" role="tab" aria-selected="'+(S.market==='new')+'">Новые авто</button>'
     + '<button class="mkt-btn'+(S.market==='used'?' on':'')+'" data-mkt="used" role="tab" aria-selected="'+(S.market==='used')+'">С пробегом</button>'
-    + '<button class="mkt-btn'+(S.market==='goods'?' on':'')+'" data-mkt="goods" role="tab" aria-selected="'+(S.market==='goods')+'">Автотовары</button>'
     + '</div>';
 }
 function bindMarketToggle(){
@@ -906,7 +899,7 @@ function bindMarketToggle(){
   });
 }
 function renderService(){
-  if(S.market==='used'){ renderServiceUsed(); } else if(S.market==='goods'){ renderServiceGoods(); } else { renderServiceNew(); }
+  if(S.market==='used'){ renderServiceUsed(); } else { renderServiceNew(); }
   bindMarketToggle();
 }
 function renderServiceNew(){
@@ -1033,7 +1026,7 @@ function renderServiceUsed(){
   bindCarousel();
   $('#btnParams').onclick=()=>{ track('params_search_tap',{market:'used'}); openListing({state:'used'}, 'Автомобили с пробегом', 'params_button_used'); };
   $('#btnKks').onclick=()=>{ track('teaser_kks_callback_tap'); openLeadForm('kks_callback'); };
-  $('#btnGoods').onclick=()=>{ track('teaser_goods_tap'); S.market='goods'; renderChrome(); renderService(); $('#scroll').scrollTop=0; updateCtx(); };
+  $('#btnGoods').onclick=()=>{ track('teaser_goods_tap'); toast('Переход в категорию «Автотовары» Wildberries — вне рамок прототипа'); };
   document.querySelectorAll('[data-coll]').forEach(b=>b.onclick=()=>{
     const c=COLLS_USED[+b.dataset.coll];
     track('collection_tap',{market:'used', type:c.type, value:c.value});
@@ -1050,22 +1043,6 @@ function renderServiceUsed(){
   track('shelf_view',{shelf_id:'allCars'});
   track('shelf_view',{shelf_id:'used2m'});
   track('recommend_feed_view',{market:'used'});
-}
-
-/* ============ Витрина «Автотовары» (заглушка) ============ */
-function renderServiceGoods(){
-  $('#scroll').innerHTML =
-    '<div class="scroll-pad">'
-    + marketToggleHTML()
-    + '<div class="goods-empty" style="position:relative" data-fr="fe08">'
-    +   annTag('витрина «Автотовары» · заглушка, наполнение в проработке','', 'top:0px; left:14px')
-    +   '<span class="ge-ic">'+icon('ic-wrench',44,44)+'</span>'
-    +   '<b>Витрина «Автотовары»</b>'
-    +   '<small>Раздел в разработке. Скоро здесь появятся шины, масла, аксессуары и другие автотовары Wildberries.</small>'
-    + '</div>'
-    + '</div>';
-  renderCTA('service');
-  track('service_page_view',{market:'goods'});
 }
 
 /* Карусель: автопрокрутка + точки, остановка при взаимодействии */
